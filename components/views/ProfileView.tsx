@@ -130,41 +130,76 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
 
     const totalFundable = settings.totalSavings + totalAssetsValue;
 
-    const { progressSavings, progressAssets, dailySaving, monthlySaving, status } = useMemo(() => {
+    const { progressSavings, progressAssets, monthlySaving, status, insights } = useMemo(() => {
         const remainingAmount = Math.max(0, goal.targetAmount - settings.totalSavings);
         const daysLeft = (new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24);
+        const monthsLeft = daysLeft / 30.44;
 
         let statusText = 'On Track';
         let statusColor = 'text-green-500';
-        let daily = 0;
         let monthly = 0;
+        let explanation = '';
+        let recommendations: string[] = [];
 
         if (remainingAmount <= 0) {
             statusText = 'Achieved';
             statusColor = 'text-green-500';
+            explanation = 'Congratulations! You\'ve reached your savings goal. Consider setting a new goal or investing your savings.';
         } else if (daysLeft <= 0) {
             statusText = 'Overdue';
             statusColor = 'text-red-500';
+            explanation = 'The deadline has passed. Consider adjusting your target date or reassessing the goal amount.';
+            recommendations = [
+                'Extend the deadline to a more realistic timeframe',
+                'Reduce the target amount if possible',
+                'Consider breaking this into smaller, achievable milestones'
+            ];
         } else {
-            daily = remainingAmount / daysLeft;
-            monthly = daily * 30.44;
+            monthly = remainingAmount / monthsLeft;
+            const incomePercentage = settings.monthlyIncome > 0 ? (monthly / settings.monthlyIncome) * 100 : 0;
+            
             if (settings.monthlyIncome > 0 && monthly > settings.monthlyIncome) {
                 statusText = 'At Risk';
                 statusColor = 'text-red-500';
+                const progressPct = (settings.totalSavings / goal.targetAmount) * 100;
+                explanation = `You need to save ${formatCurrency(monthly).display} per month (${incomePercentage.toFixed(0)}% of your income), but your monthly income is only ${formatCurrency(settings.monthlyIncome).display}. This goal requires more than 100% of your income, making it financially unsustainable.`;
+                recommendations = [
+                    `Extend deadline: Moving the deadline by ${Math.ceil(monthsLeft * 0.5)} months would reduce monthly savings to ${formatCurrency(remainingAmount / (monthsLeft * 1.5)).display}`,
+                    `Reduce target: Lowering the goal by 20% would require ${formatCurrency(goal.targetAmount * 0.8 * (1 - progressPct / 100) / monthsLeft).display} per month`,
+                    `Increase income: Consider side income or negotiate a raise to make this goal achievable`,
+                    `Break it down: Split into smaller milestones (e.g., save 50% now, rest later)`
+                ];
             } else if (settings.monthlyIncome > 0 && monthly > settings.monthlyIncome * 0.5) {
                 statusText = 'Ambitious';
                 statusColor = 'text-yellow-500';
+                explanation = `You need to save ${formatCurrency(monthly).display} per month (${incomePercentage.toFixed(0)}% of your income). This is ambitious but achievable with disciplined budgeting.`;
+                recommendations = [
+                    `Track expenses: Review spending to find ${formatCurrency(monthly * 0.3).display}-${formatCurrency(monthly * 0.5).display} in potential savings`,
+                    `Automate savings: Set up automatic transfers of ${formatCurrency(monthly).display} on payday`,
+                    `Reduce non-essentials: Cut back on dining out, subscriptions, or entertainment temporarily`,
+                    `Consider assets: Your other assets (${formatCurrency(totalAssetsValue).display}) could help if liquidated`
+                ];
+            } else {
+                statusText = 'On Track';
+                statusColor = 'text-green-500';
+                const progressPct = (settings.totalSavings / goal.targetAmount) * 100;
+                explanation = `You're making great progress! Save ${formatCurrency(monthly).display} per month (${incomePercentage.toFixed(0)}% of income) to reach your goal on time.`;
+                recommendations = [
+                    `Stay consistent: Automate ${formatCurrency(monthly).display} monthly savings`,
+                    `Monitor progress: You're ${progressPct.toFixed(0)}% there - keep it up!`,
+                    `Consider accelerating: If possible, save extra to finish early`
+                ];
             }
         }
 
         return {
             progressSavings: (settings.totalSavings / goal.targetAmount) * 100,
             progressAssets: (totalFundable / goal.targetAmount) * 100,
-            dailySaving: daily,
             monthlySaving: monthly,
-            status: { text: statusText, color: statusColor }
+            status: { text: statusText, color: statusColor },
+            insights: { explanation, recommendations, monthsLeft: Math.ceil(monthsLeft), remainingAmount }
         };
-    }, [goal, settings.totalSavings, settings.monthlyIncome, totalFundable]);
+    }, [goal, settings.totalSavings, settings.monthlyIncome, totalFundable, totalAssetsValue]);
 
     return (
         <div className="bg-card border border-border p-4 rounded-lg space-y-3">
@@ -190,21 +225,57 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
                 <ProgressBar label="Total Assets" percentage={progressAssets} colorClass="bg-blue-500" />
             </div>
 
-            {status.text !== 'Achieved' && status.text !== 'Overdue' && (
-                 <div className="text-xs text-muted-foreground grid grid-cols-2 gap-2 text-center pt-2">
-                    <div className="bg-secondary p-1 rounded">
-                        <p>Req. Daily Saving</p>
-                        <PrivacyWrapper>
-                            <p className="font-bold text-foreground">{formatCurrency(dailySaving).display}</p>
-                            <p className="text-[10px] opacity-70 font-numbers">{formatCurrency(dailySaving).exact}</p>
-                        </PrivacyWrapper>
+            {status.text !== 'Achieved' && (
+                <div className="space-y-3 pt-2 border-t border-border">
+                    {/* Key Metrics */}
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className="bg-secondary/50 p-2 rounded-lg">
+                            <p className="text-[10px] text-muted-foreground mb-1">Remaining</p>
+                            <PrivacyWrapper>
+                                <p className="font-bold text-sm font-numbers">{formatCurrency(insights.remainingAmount).display}</p>
+                                <p className="text-[9px] opacity-70 font-numbers">{formatCurrency(insights.remainingAmount).exact}</p>
+                            </PrivacyWrapper>
+                        </div>
+                        <div className="bg-secondary/50 p-2 rounded-lg">
+                            <p className="text-[10px] text-muted-foreground mb-1">Time Left</p>
+                            <p className="font-bold text-sm">{insights.monthsLeft} {insights.monthsLeft === 1 ? 'month' : 'months'}</p>
+                        </div>
                     </div>
-                    <div className="bg-secondary p-1 rounded">
-                        <p>Req. Monthly Saving</p>
-                        <PrivacyWrapper>
-                            <p className="font-bold text-foreground">{formatCurrency(monthlySaving).display}</p>
-                            <p className="text-[10px] opacity-70 font-numbers">{formatCurrency(monthlySaving).exact}</p>
-                        </PrivacyWrapper>
+
+                    {/* Monthly Savings Required */}
+                    {monthlySaving > 0 && (
+                        <div className="bg-primary/10 border border-primary/20 p-3 rounded-lg">
+                            <div className="flex items-center justify-between mb-1">
+                                <p className="text-xs font-semibold">Monthly Savings Needed</p>
+                                <PrivacyWrapper>
+                                    <p className="font-bold text-base font-numbers">{formatCurrency(monthlySaving).display}</p>
+                                </PrivacyWrapper>
+                            </div>
+                            {settings.monthlyIncome > 0 && (
+                                <p className="text-[10px] text-muted-foreground">
+                                    {((monthlySaving / settings.monthlyIncome) * 100).toFixed(0)}% of your monthly income
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Status Explanation & Recommendations */}
+                    <div className={`p-3 rounded-lg border ${status.color === 'text-red-500' ? 'bg-red-500/10 border-red-500/20' : status.color === 'text-yellow-500' ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-green-500/10 border-green-500/20'}`}>
+                        <p className={`text-xs font-semibold mb-2 ${status.color}`}>{status.text}</p>
+                        <p className="text-[11px] text-muted-foreground leading-relaxed mb-2">{insights.explanation}</p>
+                        {insights.recommendations.length > 0 && (
+                            <div className="mt-2 space-y-1">
+                                <p className="text-[10px] font-semibold text-muted-foreground uppercase">Recommendations:</p>
+                                <ul className="space-y-1">
+                                    {insights.recommendations.map((rec, idx) => (
+                                        <li key={idx} className="text-[10px] text-muted-foreground flex items-start gap-1.5">
+                                            <span className="text-primary mt-0.5">•</span>
+                                            <span>{rec}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

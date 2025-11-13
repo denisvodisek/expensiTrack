@@ -31,7 +31,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeView, setActiveView }) => {
     ];
 
     return (
-        <nav className="fixed -bottom-3 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-border flex justify-around items-center z-40" style={{ 
+        <nav className="fixed -mb-3 sm:-mb-0 bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-border flex justify-around items-center z-40" style={{ 
             height: 'calc(4rem + env(safe-area-inset-bottom, 0px))', 
             paddingBottom: 'env(safe-area-inset-bottom, 0px)',
             minHeight: '4rem'

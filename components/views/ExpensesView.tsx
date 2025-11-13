@@ -52,6 +52,8 @@ const TransactionListItem: React.FC<{ transaction: Transaction; onEdit: () => vo
 const TransactionsView: React.FC<TransactionsViewProps> = ({ onEditTransaction }) => {
     const { transactions, deleteTransaction, loading } = useAppContext();
     const [filterPeriod, setFilterPeriod] = useState('month');
+    const [customFromDate, setCustomFromDate] = useState('');
+    const [customToDate, setCustomToDate] = useState('');
 
     const filteredTransactions = useMemo(() => {
         const now = new Date();
@@ -78,6 +80,18 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({ onEditTransaction }
                 startDate = new Date();
                 startDate.setMonth(now.getMonth() - 3);
                 break;
+            case 'custom':
+                if (customFromDate) {
+                    startDate = new Date(customFromDate);
+                    startDate.setHours(0, 0, 0, 0);
+                }
+                if (customToDate) {
+                    endDate = new Date(customToDate);
+                    endDate.setHours(23, 59, 59, 999);
+                } else {
+                    endDate = todayEnd;
+                }
+                break;
         }
 
         return transactions
@@ -86,7 +100,13 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({ onEditTransaction }
                 return tDate >= startDate && tDate <= (endDate || todayEnd);
             })
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    }, [transactions, filterPeriod]);
+    }, [transactions, filterPeriod, customFromDate, customToDate]);
+
+    const handleResetCustom = () => {
+        setCustomFromDate('');
+        setCustomToDate('');
+        setFilterPeriod('month');
+    };
     
     const groupedTransactions = useMemo(() => {
         return filteredTransactions.reduce((acc, transaction) => {
@@ -100,13 +120,53 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({ onEditTransaction }
     }, [filteredTransactions]);
 
     return (
-        <div className="p-3 sm:p-4 space-y-4">
+        <div className="p-3 sm:p-4 space-y-6 sm:space-y-8">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground font-display">Transactions</h1>
             
-            <div className="flex space-x-2 bg-secondary p-1 rounded-md">
-                <FilterButton label="This Month" period="month" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
-                <FilterButton label="Last Month" period="last-month" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
-                <FilterButton label="Last 3 Months" period="quarter" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
+            <div className="space-y-3">
+                <div className="flex space-x-2 bg-secondary p-1 rounded-md">
+                    <FilterButton label="This Month" period="month" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
+                    <FilterButton label="Last Month" period="last-month" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
+                    <FilterButton label="Last 3 Months" period="quarter" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
+                    <FilterButton label="Custom" period="custom" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
+                </div>
+
+                {filterPeriod === 'custom' && (
+                    <div className="bg-card border border-border p-3 rounded-lg space-y-3">
+                        <div className="flex items-center justify-between">
+                            <p className="text-sm font-semibold">Custom Date Range</p>
+                            <button
+                                onClick={handleResetCustom}
+                                className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded hover:bg-secondary transition-colors"
+                            >
+                                Reset
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-xs text-muted-foreground mb-1">From</label>
+                                <input
+                                    type="date"
+                                    value={customFromDate}
+                                    onChange={(e) => setCustomFromDate(e.target.value)}
+                                    className="w-full bg-input border border-border rounded-md px-3 py-2 text-sm"
+                                    max={customToDate || undefined}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs text-muted-foreground mb-1">To</label>
+                                <input
+                                    type="date"
+                                    value={customToDate}
+                                    onChange={(e) => setCustomToDate(e.target.value)}
+                                    className="w-full bg-input border border-border rounded-md px-3 py-2 text-sm"
+                                    min={customFromDate || undefined}
+                                    max={new Date().toISOString().split('T')[0]}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <ChartsView transactions={filteredTransactions} />
