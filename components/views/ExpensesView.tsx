@@ -201,7 +201,7 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({ onEditTransaction }
 
 const FilterButton: React.FC<{label: string; period: string; activePeriod: string; setPeriod: (p: string) => void}> = 
     ({label, period, activePeriod, setPeriod}) => (
-    <button onClick={() => setPeriod(period)} className={`flex-1 py-1.5 px-2 rounded text-xs font-semibold transition-colors ${activePeriod === period ? 'bg-background shadow' : 'text-muted-foreground'}`}>{label}</button>
+    <button onClick={() => setPeriod(period)} className={`flex-1 py-1.5 px-2 rounded text-[10px] font-semibold transition-colors ${activePeriod === period ? 'bg-background shadow' : 'text-muted-foreground'}`}>{label}</button>
 );
 
 
