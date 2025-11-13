@@ -113,8 +113,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
                 
                 <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
                     <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-muted-foreground font-sans">HKD</span>
-                        <input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" required className="w-full bg-secondary border border-border rounded-md text-3xl font-bold text-right p-3 pr-4 pl-16 text-foreground focus:ring-1 focus:ring-ring font-display" />
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base sm:text-lg text-muted-foreground">HKD</span>
+                        <input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" required className="w-full bg-secondary border border-border rounded-md text-2xl sm:text-3xl font-bold text-right p-3 pr-4 pl-14 sm:pl-16 text-foreground focus:ring-1 focus:ring-ring font-numbers" />
                     </div>
 
                     <div>

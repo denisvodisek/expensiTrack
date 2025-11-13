@@ -12,9 +12,9 @@ const ProfileView: React.FC = () => {
     const { settings, updateSettings } = useAppContext();
     if (!settings) return null;
     return (
-        <div className="p-4 space-y-8">
+        <div className="p-3 sm:p-4 space-y-6 sm:space-y-8">
             <header className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-foreground font-display">Profile & Settings</h1>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground font-display">Profile & Settings</h1>
                  <button onClick={() => updateSettings({ privacyMode: !settings.privacyMode })} className="text-muted-foreground hover:text-foreground p-2 rounded-full">
                     {settings.privacyMode ? <PrivacyOnIcon className="w-6 h-6" /> : <PrivacyOffIcon className="w-6 h-6" />}
                 </button>
@@ -52,20 +52,20 @@ const NetWorthSection: React.FC = () => {
     if(!settings) return null;
 
     return (
-        <section className="space-y-4">
-            <h2 className="text-xl font-semibold font-display">Net Worth</h2>
-            <div className="bg-card border border-border p-6 rounded-lg text-center">
-                <h3 className="text-sm font-medium text-muted-foreground">Total Net Worth</h3>
-                <p className="text-4xl font-bold mt-1 tracking-tight font-display"><PrivacyWrapper>{currencyFormatter.format(netWorth)}</PrivacyWrapper></p>
+        <section className="space-y-3 sm:space-y-4">
+            <h2 className="text-lg sm:text-xl font-semibold font-display">Net Worth</h2>
+            <div className="bg-card border border-border p-4 sm:p-6 rounded-lg text-center">
+                <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Total Net Worth</h3>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold mt-1 tracking-tight font-numbers break-words"><PrivacyWrapper>{currencyFormatter.format(netWorth)}</PrivacyWrapper></p>
             </div>
-             <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="bg-card border border-border p-4 rounded-lg">
-                    <h3 className="text-green-400 font-semibold">Total Assets</h3>
-                    <p className="text-lg font-bold font-display"><PrivacyWrapper>{currencyFormatter.format(settings.totalSavings + totalAssetsValue)}</PrivacyWrapper></p>
+             <div className="grid grid-cols-2 gap-2 sm:gap-4 text-center">
+                <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
+                    <h3 className="text-xs sm:text-sm text-green-400 font-semibold">Total Assets</h3>
+                    <p className="text-sm sm:text-base md:text-lg font-bold font-numbers break-words"><PrivacyWrapper>{currencyFormatter.format(settings.totalSavings + totalAssetsValue)}</PrivacyWrapper></p>
                 </div>
-                 <div className="bg-card border border-border p-4 rounded-lg">
-                    <h3 className="text-red-400 font-semibold">Total Liabilities</h3>
-                    <p className="text-lg font-bold font-display"><PrivacyWrapper>{currencyFormatter.format(totalLiabilities)}</PrivacyWrapper></p>
+                 <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
+                    <h3 className="text-xs sm:text-sm text-red-400 font-semibold">Total Liabilities</h3>
+                    <p className="text-sm sm:text-base md:text-lg font-bold font-numbers break-words"><PrivacyWrapper>{currencyFormatter.format(totalLiabilities)}</PrivacyWrapper></p>
                 </div>
             </div>
             
@@ -73,7 +73,7 @@ const NetWorthSection: React.FC = () => {
                 <label className="block text-sm font-medium text-muted-foreground">Total Savings (Liquid Cash)</label>
                 <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                     <input type="number" value={settings.totalSavings} onChange={e => updateSettings({ totalSavings: parseFloat(e.target.value) || 0 })} className={`w-full bg-input p-2 rounded-md font-semibold pl-6 font-display ${settings.privacyMode ? 'blur' : ''}`}/>
+                     <input type="number" value={settings.totalSavings} onChange={e => updateSettings({ totalSavings: parseFloat(e.target.value) || 0 })} className={`w-full bg-input p-2 rounded-md font-semibold pl-6 font-numbers text-sm sm:text-base ${settings.privacyMode ? 'blur' : ''}`}/>
                 </div>
                 <p className="text-xs text-muted-foreground">This is your central savings pool for all goals.</p>
             </div>
@@ -86,7 +86,7 @@ const NetWorthSection: React.FC = () => {
                 {showAddAssetForm && (
                      <form onSubmit={handleAddAsset} className="bg-card p-2 rounded-lg flex gap-2 border border-border">
                         <input type="text" placeholder="Asset Name" value={assetName} onChange={e => setAssetName(e.target.value)} required className="flex-1 bg-input p-2 rounded-md text-sm"/>
-                        <input type="number" placeholder="Value" value={assetValue} onChange={e => setAssetValue(e.target.value)} required className="w-28 bg-input p-2 rounded-md text-sm font-display"/>
+                        <input type="number" placeholder="Value" value={assetValue} onChange={e => setAssetValue(e.target.value)} required className="w-24 sm:w-28 bg-input p-2 rounded-md text-xs sm:text-sm font-numbers"/>
                         <button type="submit" className="bg-primary text-primary-foreground font-bold px-3 rounded-md text-sm">Add</button>
                     </form>
                 )}
@@ -98,7 +98,7 @@ const NetWorthSection: React.FC = () => {
                             <p className="text-xs text-muted-foreground">Updated: {new Date(asset.lastUpdated).toLocaleDateString()}</p>
                        </div>
                        <div className="flex items-center gap-2">
-                        <input type="number" value={asset.value} onChange={(e) => updateAsset({...asset, value: parseFloat(e.target.value) || 0})} className={`w-28 bg-input p-2 rounded-md text-right font-mono text-sm font-display ${settings.privacyMode ? 'blur' : ''}`}/>
+                        <input type="number" value={asset.value} onChange={(e) => updateAsset({...asset, value: parseFloat(e.target.value) || 0})} className={`w-24 sm:w-28 bg-input p-2 rounded-md text-right text-xs sm:text-sm font-numbers ${settings.privacyMode ? 'blur' : ''}`}/>
                         <button onClick={() => deleteAsset(asset.id)} className="text-muted-foreground hover:text-destructive"><DeleteIcon className="w-4 h-4"/></button>
                        </div>
                     </div>
@@ -162,9 +162,9 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
                 </div>
                 <button onClick={() => deleteGoal(goal.id)} className="text-muted-foreground hover:text-destructive"><DeleteIcon className="w-4 h-4"/></button>
             </div>
-            <p className="text-lg font-semibold font-display">
+            <p className="text-base sm:text-lg font-semibold font-numbers break-words">
                 <PrivacyWrapper>{currencyFormatter.format(settings.totalSavings)}</PrivacyWrapper>
-                <span className="text-sm text-muted-foreground"> / <PrivacyWrapper>{currencyFormatter.format(goal.targetAmount)}</PrivacyWrapper></span>
+                <span className="text-xs sm:text-sm text-muted-foreground"> / <PrivacyWrapper>{currencyFormatter.format(goal.targetAmount)}</PrivacyWrapper></span>
             </p>
             
             <div>
@@ -226,7 +226,7 @@ const GoalsSection: React.FC = () => {
              {showAddForm && (
                 <form onSubmit={handleSubmit} className="bg-card border border-border p-4 rounded-lg space-y-3">
                     <input type="text" placeholder="Goal Name (e.g., New Laptop)" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-input p-2 rounded-md"/>
-                    <input type="number" placeholder="Target Amount (HKD)" value={targetAmount} onChange={e => setTargetAmount(e.target.value)} required className="w-full bg-input p-2 rounded-md font-display"/>
+                    <input type="number" placeholder="Target Amount (HKD)" value={targetAmount} onChange={e => setTargetAmount(e.target.value)} required className="w-full bg-input p-2 rounded-md font-numbers text-sm sm:text-base"/>
                     <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} required className="w-full bg-input p-2 rounded-md"/>
                     <button type="submit" className="w-full bg-primary text-primary-foreground font-bold py-2 rounded-md text-sm">Add Goal</button>
                 </form>
@@ -262,7 +262,7 @@ const CardsSection: React.FC = () => {
             {showAddForm && (
                 <form onSubmit={handleSubmit} className="bg-card border border-border p-4 rounded-lg space-y-3">
                     <input type="text" placeholder="Card Name (e.g., Visa Gold)" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-input p-2 rounded-md"/>
-                    <input type="number" placeholder="Credit Limit (HKD)" value={limit} onChange={e => setLimit(e.target.value)} required className="w-full bg-input p-2 rounded-md font-display"/>
+                    <input type="number" placeholder="Credit Limit (HKD)" value={limit} onChange={e => setLimit(e.target.value)} required className="w-full bg-input p-2 rounded-md font-numbers text-sm sm:text-base"/>
                     <button type="submit" className="w-full bg-primary text-primary-foreground font-bold py-2 rounded-md text-sm">Add Card</button>
                 </form>
             )}
@@ -277,9 +277,9 @@ const CardsSection: React.FC = () => {
                              <div className="w-full bg-secondary rounded-full h-2 my-2">
                                 <div className="bg-primary h-2 rounded-full" style={{ width: `${utilization}%` }}></div>
                             </div>
-                            <div className="flex justify-between text-sm text-muted-foreground">
-                                <span>Bal: <PrivacyWrapper>{currencyFormatter.format(card.balance)}</PrivacyWrapper></span>
-                                <span>Limit: <PrivacyWrapper>{currencyFormatter.format(card.limit)}</PrivacyWrapper></span>
+                            <div className="flex justify-between text-xs sm:text-sm text-muted-foreground">
+                                <span className="font-numbers">Bal: <PrivacyWrapper>{currencyFormatter.format(card.balance)}</PrivacyWrapper></span>
+                                <span className="font-numbers">Limit: <PrivacyWrapper>{currencyFormatter.format(card.limit)}</PrivacyWrapper></span>
                             </div>
                         </div>
                     );
@@ -360,7 +360,7 @@ const SettingsSection: React.FC = () => {
             <form onSubmit={handleUpdateIncome} className="bg-card border border-border p-4 rounded-lg space-y-2">
                 <label htmlFor="income" className="block text-sm font-medium text-muted-foreground">Monthly Income (for goal projections)</label>
                 <div className="flex gap-2">
-                    <input id="income" type="number" placeholder="e.g., 30000" value={monthlyIncome} onChange={e => setMonthlyIncome(e.target.value)} className={`flex-1 bg-input p-2 rounded-md font-display ${settings.privacyMode ? 'blur' : ''}`}/>
+                    <input id="income" type="number" placeholder="e.g., 30000" value={monthlyIncome} onChange={e => setMonthlyIncome(e.target.value)} className={`flex-1 bg-input p-2 rounded-md font-numbers text-sm sm:text-base ${settings.privacyMode ? 'blur' : ''}`}/>
                     <button type="submit" className="bg-primary text-primary-foreground font-bold py-2 px-4 rounded-md text-sm w-24">
                         {saved ? <CheckCircleIcon className="w-5 h-5 mx-auto"/> : 'Save'}
                     </button>

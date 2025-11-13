@@ -59,23 +59,23 @@ const DashboardView: React.FC = () => {
     return (
         <div className="p-4 space-y-6">
             <header className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-2xl font-bold font-display">Hello, {settings.userName}</h1>
-                    <p className="text-muted-foreground">Here’s your financial overview.</p>
+                <div className="flex-1 min-w-0">
+                    <h1 className="text-xl sm:text-2xl font-bold font-display truncate">Hello, {settings.userName}</h1>
+                    <p className="text-sm text-muted-foreground">Here's your financial overview.</p>
                 </div>
                 <button onClick={() => updateSettings({ privacyMode: !settings.privacyMode })} className="text-muted-foreground hover:text-foreground p-2 rounded-full">
                     {settings.privacyMode ? <PrivacyOnIcon className="w-6 h-6" /> : <PrivacyOffIcon className="w-6 h-6" />}
                 </button>
             </header>
             
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
                 <StatCard title="Income" value={currencyFormatter.format(monthlyIncome)} color="text-green-500" />
                 <StatCard title="Expense" value={currencyFormatter.format(monthlyExpense)} color="text-red-500" />
                 <StatCard title="Net Flow" value={currencyFormatter.format(netFlow)} color={netFlow >= 0 ? 'text-green-500' : 'text-red-500'} />
             </div>
 
-             <div className="bg-card border border-border p-4 rounded-lg">
-                <h2 className="text-lg font-semibold font-display mb-2">Daily Flow (This Month)</h2>
+             <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
+                <h2 className="text-base sm:text-lg font-semibold font-display mb-2">Daily Flow (This Month)</h2>
                 <div className="h-48">
                      <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={barChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
@@ -97,8 +97,8 @@ const DashboardView: React.FC = () => {
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-card border border-border p-4 rounded-lg">
-                    <h2 className="text-lg font-semibold font-display mb-2">Category Breakdown</h2>
+                <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
+                    <h2 className="text-base sm:text-lg font-semibold font-display mb-2">Category Breakdown</h2>
                     {pieChartData.length > 0 ? (
                         <div className="h-48">
                             <ResponsiveContainer width="100%" height="100%">
@@ -118,8 +118,8 @@ const DashboardView: React.FC = () => {
                     )}
                 </div>
 
-                <div className="bg-card border border-border p-4 rounded-lg space-y-3">
-                    <h2 className="text-lg font-semibold font-display">Credit Cards</h2>
+                <div className="bg-card border border-border p-3 sm:p-4 rounded-lg space-y-3">
+                    <h2 className="text-base sm:text-lg font-semibold font-display">Credit Cards</h2>
                     {activeCards.length > 0 ? activeCards.map(card => {
                         const utilization = card.limit > 0 ? (card.balance / card.limit) * 100 : 0;
                         return (
@@ -134,8 +134,8 @@ const DashboardView: React.FC = () => {
                                     <div className="bg-primary h-2 rounded-full" style={{ width: `${utilization}%` }}></div>
                                 </div>
                                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                                    <span><PrivacyWrapper>{currencyFormatter.format(card.balance)}</PrivacyWrapper></span>
-                                    <span><PrivacyWrapper>{currencyFormatter.format(card.limit)}</PrivacyWrapper></span>
+                                    <span className="font-numbers"><PrivacyWrapper>{currencyFormatter.format(card.balance)}</PrivacyWrapper></span>
+                                    <span className="font-numbers"><PrivacyWrapper>{currencyFormatter.format(card.limit)}</PrivacyWrapper></span>
                                 </div>
                             </div>
                         )
@@ -150,9 +150,9 @@ const DashboardView: React.FC = () => {
 };
 
 const StatCard: React.FC<{title: string; value: string; color?: string}> = ({ title, value, color }) => (
-    <div className="bg-card border border-border p-4 rounded-lg col-span-1">
-        <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-        <p className={`text-2xl font-bold mt-1 font-display ${color || 'text-foreground'}`}><PrivacyWrapper>{value}</PrivacyWrapper></p>
+    <div className="bg-card border border-border p-2 sm:p-4 rounded-lg col-span-1">
+        <h3 className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{title}</h3>
+        <p className={`text-lg sm:text-xl md:text-2xl font-bold mt-1 font-numbers break-words ${color || 'text-foreground'}`}><PrivacyWrapper>{value}</PrivacyWrapper></p>
     </div>
 );
 

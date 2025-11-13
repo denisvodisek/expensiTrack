@@ -19,18 +19,18 @@ const TransactionListItem: React.FC<{ transaction: Transaction; onEdit: () => vo
     const category = categories.find(c => c.name === transaction.category);
 
     return (
-        <div className="bg-card p-3 rounded-lg flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-                <div className="bg-secondary p-2 rounded-md text-xl">
+        <div className="bg-card p-3 rounded-lg flex items-center justify-between gap-2">
+            <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+                <div className="bg-secondary p-1.5 sm:p-2 rounded-md text-lg sm:text-xl flex-shrink-0">
                     <span>{category?.emoji || '-'}</span>
                 </div>
-                <div>
-                    <p className="font-semibold">{transaction.category}</p>
-                    <p className="text-sm text-muted-foreground">{transaction.description || (transaction.type === 'expense' ? paymentDetail : 'Income')}</p>
+                <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm sm:text-base truncate">{transaction.category}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">{transaction.description || (transaction.type === 'expense' ? paymentDetail : 'Income')}</p>
                 </div>
             </div>
-            <div className="text-right flex items-center space-x-4">
-                 <p className={`font-bold text-lg font-display ${transaction.type === 'income' ? 'text-green-400' : 'text-foreground'}`}>
+            <div className="text-right flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+                 <p className={`font-bold text-base sm:text-lg font-numbers whitespace-nowrap ${transaction.type === 'income' ? 'text-green-400' : 'text-foreground'}`}>
                     {transaction.type === 'income' ? '+' : '-'}
                     {currencyFormatter.format(transaction.amount)}
                 </p>
@@ -94,8 +94,8 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({ onEditTransaction }
     }, [filteredTransactions]);
 
     return (
-        <div className="p-4 space-y-4">
-            <h1 className="text-3xl font-bold text-foreground font-display">Transactions</h1>
+        <div className="p-3 sm:p-4 space-y-4">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground font-display">Transactions</h1>
             
             <div className="flex space-x-2 bg-secondary p-1 rounded-md">
                 <FilterButton label="This Week" period="week" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
@@ -177,7 +177,7 @@ const ChartsView: React.FC<{transactions: Transaction[]}> = ({ transactions }) =
 
     return (
         <div className="space-y-4">
-             <div className="grid grid-cols-3 gap-4">
+             <div className="grid grid-cols-3 gap-2 sm:gap-4">
                 <StatCard title="Income" value={currencyFormatter.format(totalIncome)} color="text-green-500" />
                 <StatCard title="Expense" value={currencyFormatter.format(totalExpense)} color="text-red-500" />
                 <StatCard title="Net Flow" value={currencyFormatter.format(netFlow)} color={netFlow >= 0 ? 'text-green-500' : 'text-red-500'} />
@@ -218,9 +218,9 @@ const ChartsView: React.FC<{transactions: Transaction[]}> = ({ transactions }) =
 };
 
 const StatCard: React.FC<{title: string; value: string; color?: string}> = ({ title, value, color }) => (
-    <div className="bg-card border border-border p-3 rounded-lg col-span-1 text-center">
-        <h3 className="text-xs font-medium text-muted-foreground">{title}</h3>
-        <p className={`text-xl font-bold font-display ${color || 'text-foreground'}`}><PrivacyWrapper>{value}</PrivacyWrapper></p>
+    <div className="bg-card border border-border p-2 sm:p-3 rounded-lg col-span-1 text-center">
+        <h3 className="text-xs font-medium text-muted-foreground truncate">{title}</h3>
+        <p className={`text-base sm:text-lg md:text-xl font-bold font-numbers break-words ${color || 'text-foreground'}`}><PrivacyWrapper>{value}</PrivacyWrapper></p>
     </div>
 );
 
