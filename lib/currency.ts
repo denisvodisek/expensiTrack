@@ -17,9 +17,9 @@ const exactFormatter = new Intl.NumberFormat('en-US', {
 
 export function formatCurrencyCompact(amount: number): FormattedCurrency {
   const exact = exactFormatter.format(amount).replace('HK$', '$');
-  
+
   const absAmount = Math.abs(amount);
-  
+
   if (absAmount < 1000) {
     // Less than 1K: show up to 1 decimal place, max 3 digits total
     // Examples: 122.1, 99.5, 5.2
@@ -47,12 +47,21 @@ export function formatCurrencyCompact(amount: number): FormattedCurrency {
       display: `${amount < 0 ? '-' : ''}$${rounded.toFixed(1)}K`,
       exact: exact, // exactFormatter already includes the sign
     };
-  } else {
-    // 100K+: show whole number in K
+  } else if (absAmount < 1000000) {
+    // 100K to 999K: show whole number in K
     // Examples: 112K, 500K
     const kValue = Math.round(absAmount / 1000);
     return {
       display: `${amount < 0 ? '-' : ''}$${kValue}K`,
+      exact: exact, // exactFormatter already includes the sign
+    };
+  } else {
+    // 1M+: show in M (millions)
+    // Examples: 1M, 1.2M, 2.5M
+    const mValue = absAmount / 1000000;
+    const rounded = Math.round(mValue * 10) / 10;
+    return {
+      display: `${amount < 0 ? '-' : ''}$${rounded.toFixed(rounded % 1 === 0 ? 0 : 1)}M`,
       exact: exact, // exactFormatter already includes the sign
     };
   }
