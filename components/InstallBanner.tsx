@@ -9,16 +9,22 @@ const InstallBanner: React.FC = () => {
     // Check if app is already installed
     const checkIfInstalled = () => {
       if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('[PWA] App is already installed (standalone mode)');
         setIsInstalled(true);
         setShowInstallButton(false);
+        return true;
       } else if ((window.navigator as any).standalone === true) {
+        console.log('[PWA] App is already installed (iOS standalone)');
         setIsInstalled(true);
         setShowInstallButton(false);
+        return true;
       }
+      return false;
     };
 
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: any) => {
+      console.log('[PWA] beforeinstallprompt event fired!', e);
       e.preventDefault();
       setDeferredPrompt(e);
       setShowInstallButton(true);
@@ -26,15 +32,36 @@ const InstallBanner: React.FC = () => {
 
     // Listen for appinstalled event
     const handleAppInstalled = () => {
+      console.log('[PWA] App was installed');
       setIsInstalled(true);
       setShowInstallButton(false);
       setDeferredPrompt(null);
     };
 
-    checkIfInstalled();
+    if (checkIfInstalled()) {
+      return;
+    }
 
+    console.log('[PWA] Setting up install prompt listeners...');
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
+
+    // Check if prompt was already stored (from page reload)
+    const storedPrompt = (window as any).deferredPrompt;
+    if (storedPrompt) {
+      console.log('[PWA] Found stored deferred prompt');
+      setDeferredPrompt(storedPrompt);
+      setShowInstallButton(true);
+    }
+
+    // Debug: Log after a delay to see if event fires
+    setTimeout(() => {
+      if (!showInstallButton && !isInstalled) {
+        console.log('[PWA] Install prompt not available yet. This is normal - browsers may require multiple visits.');
+        console.log('[PWA] Check: Service Worker registered?', 'serviceWorker' in navigator);
+        console.log('[PWA] Check: Manifest accessible?', document.querySelector('link[rel="manifest"]') !== null);
+      }
+    }, 2000);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -43,27 +70,47 @@ const InstallBanner: React.FC = () => {
   }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      console.log('[PWA] No deferred prompt available. Trying manual install...');
+      // Fallback: Show instructions for manual install
+      alert('To install this app:\n\nAndroid Chrome: Tap Menu (⋮) → "Install app"\n\niOS Safari: Tap Share → "Add to Home Screen"');
+      return;
+    }
 
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-    } else {
-      console.log('User dismissed the install prompt');
+    try {
+      console.log('[PWA] Showing install prompt...');
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      
+      console.log('[PWA] User choice:', outcome);
+      if (outcome === 'accepted') {
+        console.log('[PWA] User accepted the install prompt');
+      } else {
+        console.log('[PWA] User dismissed the install prompt');
+      }
+    } catch (error) {
+      console.error('[PWA] Error showing install prompt:', error);
     }
     
     setDeferredPrompt(null);
     setShowInstallButton(false);
   };
 
-  if (isInstalled || !showInstallButton) {
+  // Don't show if already installed
+  if (isInstalled) {
+    return null;
+  }
+
+  // Show banner if we have a prompt OR if we're on a mobile device (for manual install instructions)
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const shouldShow = showInstallButton || (isMobile && !isInstalled);
+
+  if (!shouldShow) {
     return null;
   }
 
   return (
-    <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center justify-between gap-4 shadow-lg z-50">
+    <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center justify-between gap-4 shadow-lg z-50 sticky top-0">
       <div className="flex items-center gap-3 flex-1">
         <div className="flex-shrink-0">
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -72,16 +119,27 @@ const InstallBanner: React.FC = () => {
         </div>
         <div className="flex-1">
           <p className="text-sm font-semibold">Install ExpensiTrak</p>
-          <p className="text-xs opacity-90">Add to home screen for quick access</p>
+          <p className="text-xs opacity-90">
+            {deferredPrompt ? 'Tap Install to add to home screen' : 'Use browser menu to install'}
+          </p>
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <button
-          onClick={handleInstallClick}
-          className="bg-white text-primary px-4 py-2 rounded-md text-sm font-semibold hover:bg-opacity-90 transition-colors"
-        >
-          Install
-        </button>
+        {deferredPrompt ? (
+          <button
+            onClick={handleInstallClick}
+            className="bg-secondary text-secondary-foreground px-4 py-2 rounded-md text-sm font-semibold hover:bg-secondary/80 transition-colors border border-border"
+          >
+            Install
+          </button>
+        ) : (
+          <button
+            onClick={handleInstallClick}
+            className="bg-secondary text-secondary-foreground px-4 py-2 rounded-md text-sm font-semibold hover:bg-secondary/80 transition-colors border border-border"
+          >
+            How to Install
+          </button>
+        )}
       </div>
     </div>
   );

@@ -20,7 +20,18 @@ export const ServiceWorkerManager: React.FC<ServiceWorkerManagerProps> = ({ chil
       try {
         swRegistration = await navigator.serviceWorker.register('/sw.js');
         setRegistration(swRegistration);
-        console.log('Service Worker registered successfully');
+        console.log('[PWA] Service Worker registered successfully:', swRegistration.scope);
+        
+        // Check if service worker is active
+        if (swRegistration.active) {
+          console.log('[PWA] Service Worker is active');
+        }
+        if (swRegistration.installing) {
+          console.log('[PWA] Service Worker is installing...');
+        }
+        if (swRegistration.waiting) {
+          console.log('[PWA] Service Worker is waiting...');
+        }
 
         // Check for updates
         await swRegistration.update();
