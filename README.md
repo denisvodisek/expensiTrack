@@ -10,7 +10,8 @@ A production-ready expense tracking application built with React and TypeScript.
 - Track assets and net worth
 - Privacy mode
 - Dark/Light theme support
-- **Export all data to JSON** for backup
+- **Export/Import all data to JSON** for backup
+- **PWA Support** - Install on your phone and use offline
 
 ## Tech Stack
 
@@ -72,6 +73,25 @@ All data is stored in the browser's localStorage:
 - Settings
 
 **Export your data**: Go to Profile → Settings → "Export All Data (JSON)" to download a backup of all your data.
+
+**Import your data**: Use "Import Data (JSON)" to restore from a backup.
+
+## PWA Installation
+
+The app is configured as a Progressive Web App (PWA) and can be installed on mobile devices.
+
+### On Mobile (iOS/Android):
+
+- **iOS Safari**: Tap Share → "Add to Home Screen"
+- **Android Chrome**: Tap Menu → "Install App" or "Add to Home Screen"
+- The app will work offline and appear like a native app!
+
+### Testing Locally:
+
+1. Build the app: `npm run build`
+2. Serve it: `npm run preview` (or use a local server)
+3. Open in mobile browser or Chrome DevTools mobile emulator
+4. Check DevTools → Application → Manifest for PWA status
 
 ## Deployment
 
