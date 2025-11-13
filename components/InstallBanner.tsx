@@ -3,7 +3,7 @@ import { CloseIcon } from './Icons';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 }
 
 const InstallBanner: React.FC = () => {
@@ -34,6 +34,24 @@ const InstallBanner: React.FC = () => {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
+    
+    // Listen for custom events from index.html
+    const handlePWAInstallAvailable = () => {
+      const storedPrompt = (window as any).deferredPrompt;
+      if (storedPrompt) {
+        setDeferredPrompt(storedPrompt);
+        setIsVisible(true);
+      }
+    };
+    
+    const handlePWAInstalled = () => {
+      setIsInstalled(true);
+      setIsVisible(false);
+      setDeferredPrompt(null);
+    };
+    
+    window.addEventListener('pwa-install-available', handlePWAInstallAvailable);
+    window.addEventListener('pwa-installed', handlePWAInstalled);
 
     // Check if prompt was already stored
     const storedPrompt = (window as any).deferredPrompt;
@@ -41,31 +59,42 @@ const InstallBanner: React.FC = () => {
       setDeferredPrompt(storedPrompt);
       setIsVisible(true);
     }
-
+    
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('pwa-install-available', handlePWAInstallAvailable);
+      window.removeEventListener('pwa-installed', handlePWAInstalled);
     };
   }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-
-    // Show the install prompt
-    deferredPrompt.prompt();
-
-    // Wait for the user to respond
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-      setIsInstalled(true);
-    } else {
-      console.log('User dismissed the install prompt');
+    if (!deferredPrompt) {
+      console.log('No deferred prompt available');
+      return;
     }
 
-    setIsVisible(false);
-    setDeferredPrompt(null);
+    try {
+      // Show the install prompt
+      await deferredPrompt.prompt();
+
+      // Wait for the user to respond
+      const choiceResult = await deferredPrompt.userChoice;
+      console.log('User choice:', choiceResult);
+
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+        setIsInstalled(true);
+        setIsVisible(false);
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+
+      // Clear the deferred prompt so it can't be used again
+      setDeferredPrompt(null);
+    } catch (error) {
+      console.error('Error showing install prompt:', error);
+    }
   };
 
   const handleDismiss = () => {
