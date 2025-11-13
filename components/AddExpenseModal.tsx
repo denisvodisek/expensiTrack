@@ -25,6 +25,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
     const [showNewCategory, setShowNewCategory] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState('');
     const [newCategoryEmoji, setNewCategoryEmoji] = useState('');
+    const [showConfetti, setShowConfetti] = useState(false);
     
     const expenseCategories = categories.filter(c => c.type === 'expense');
     const incomeCategories = categories.filter(c => c.type === 'income');
@@ -109,9 +110,21 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
     const activeCards = cards.filter(c => !c.archived);
     
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md relative flex flex-col space-y-4 max-h-[90vh] overflow-y-auto hide-scrollbar">
-                <button type="button" onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
+        <>
+            {/* Confetti Animation */}
+            {showConfetti && (
+                <Confetti
+                    width={window.innerWidth}
+                    height={window.innerHeight}
+                    recycle={false}
+                    numberOfPieces={200}
+                    gravity={0.3}
+                />
+            )}
+
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2">
+                <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md relative flex flex-col space-y-4 max-h-[90vh] overflow-y-auto hide-scrollbar">
+                <button type="button" onClick={() => { onClose(); setShowConfetti(false); }} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
                     <CloseIcon className="w-6 h-6" />
                 </button>
                 <h2 className="text-xl font-bold text-center text-foreground font-display">
@@ -191,8 +204,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
                         {transactionToEdit ? 'Update' : 'Add'} Transaction
                     </button>
                 </form>
+                </div>
             </div>
-        </div>
         </>
     );
 };
