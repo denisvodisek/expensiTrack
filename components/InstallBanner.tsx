@@ -1,121 +1,64 @@
 import React, { useState, useEffect } from 'react';
-import { CloseIcon } from './Icons';
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
-}
 
 const InstallBanner: React.FC = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [showInstallButton, setShowInstallButton] = useState(false);
 
   useEffect(() => {
     // Check if app is already installed
-    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
-      setIsInstalled(true);
-      return;
-    }
+    const checkIfInstalled = () => {
+      if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+        setIsInstalled(true);
+        setShowInstallButton(false);
+      } else if ((window.navigator as any).standalone === true) {
+        setIsInstalled(true);
+        setShowInstallButton(false);
+      }
+    };
 
     // Listen for beforeinstallprompt event
-    const handleBeforeInstallPrompt = (e: Event) => {
+    const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setIsVisible(true);
+      setDeferredPrompt(e);
+      setShowInstallButton(true);
     };
 
-    // Listen for app installed event
+    // Listen for appinstalled event
     const handleAppInstalled = () => {
       setIsInstalled(true);
-      setIsVisible(false);
+      setShowInstallButton(false);
       setDeferredPrompt(null);
     };
+
+    checkIfInstalled();
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
-    
-    // Listen for custom events from index.html
-    const handlePWAInstallAvailable = () => {
-      const storedPrompt = (window as any).deferredPrompt;
-      if (storedPrompt) {
-        setDeferredPrompt(storedPrompt);
-        setIsVisible(true);
-      }
-    };
-    
-    const handlePWAInstalled = () => {
-      setIsInstalled(true);
-      setIsVisible(false);
-      setDeferredPrompt(null);
-    };
-    
-    window.addEventListener('pwa-install-available', handlePWAInstallAvailable);
-    window.addEventListener('pwa-installed', handlePWAInstalled);
 
-    // Check if prompt was already stored
-    const storedPrompt = (window as any).deferredPrompt;
-    if (storedPrompt) {
-      setDeferredPrompt(storedPrompt);
-      setIsVisible(true);
-    }
-    
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
-      window.removeEventListener('pwa-install-available', handlePWAInstallAvailable);
-      window.removeEventListener('pwa-installed', handlePWAInstalled);
     };
   }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) {
-      console.log('No deferred prompt available');
-      return;
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    } else {
+      console.log('User dismissed the install prompt');
     }
-
-    try {
-      // Show the install prompt
-      await deferredPrompt.prompt();
-
-      // Wait for the user to respond
-      const choiceResult = await deferredPrompt.userChoice;
-      console.log('User choice:', choiceResult);
-
-      if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted the install prompt');
-        setIsInstalled(true);
-        setIsVisible(false);
-      } else {
-        console.log('User dismissed the install prompt');
-      }
-
-      // Clear the deferred prompt so it can't be used again
-      setDeferredPrompt(null);
-    } catch (error) {
-      console.error('Error showing install prompt:', error);
-    }
+    
+    setDeferredPrompt(null);
+    setShowInstallButton(false);
   };
 
-  const handleDismiss = () => {
-    setIsVisible(false);
-    // Store dismissal in localStorage to not show again for a while
-    localStorage.setItem('pwa-install-dismissed', Date.now().toString());
-  };
-
-  // Check if user dismissed recently (within 7 days)
-  useEffect(() => {
-    const dismissed = localStorage.getItem('pwa-install-dismissed');
-    if (dismissed) {
-      const dismissedTime = parseInt(dismissed, 10);
-      const daysSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24);
-      if (daysSinceDismissed < 7) {
-        setIsVisible(false);
-      }
-    }
-  }, []);
-
-  if (isInstalled || !isVisible || !deferredPrompt) {
+  if (isInstalled || !showInstallButton) {
     return null;
   }
 
@@ -138,13 +81,6 @@ const InstallBanner: React.FC = () => {
           className="bg-white text-primary px-4 py-2 rounded-md text-sm font-semibold hover:bg-opacity-90 transition-colors"
         >
           Install
-        </button>
-        <button
-          onClick={handleDismiss}
-          className="text-primary-foreground hover:bg-white hover:bg-opacity-20 rounded-full p-1 transition-colors"
-          aria-label="Dismiss"
-        >
-          <CloseIcon className="w-5 h-5" />
         </button>
       </div>
     </div>

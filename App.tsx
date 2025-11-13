@@ -9,6 +9,7 @@ import { AddIcon } from './components/Icons';
 import AddTransactionModal from './components/AddExpenseModal';
 import OnboardingModal from './components/OnboardingModal';
 import InstallBanner from './components/InstallBanner';
+import { ServiceWorkerManager } from './components/ServiceWorkerManager';
 import type { Transaction } from './types';
 import { useAuth } from './contexts/AuthContext';
 import LoginView from './components/views/LoginView';
@@ -98,9 +99,11 @@ const App: React.FC = () => {
     }
 
     return (
-        <AppProvider>
-            <AppContent />
-        </AppProvider>
+        <ServiceWorkerManager>
+            <AppProvider>
+                <AppContent />
+            </AppProvider>
+        </ServiceWorkerManager>
     );
 };
 

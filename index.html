@@ -169,21 +169,6 @@
         }
       })();
 
-      // PWA Install Prompt Handler - Store for React component
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        const promptEvent = e as any;
-        (window as any).deferredPrompt = promptEvent;
-        console.log('PWA install prompt available', promptEvent);
-        // Dispatch custom event for React component
-        window.dispatchEvent(new CustomEvent('pwa-install-available'));
-      });
-
-      window.addEventListener('appinstalled', () => {
-        console.log('PWA was installed');
-        (window as any).deferredPrompt = null;
-        window.dispatchEvent(new CustomEvent('pwa-installed'));
-      });
     </script>
   <script type="importmap">
 {
