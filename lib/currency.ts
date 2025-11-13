@@ -27,7 +27,7 @@ export function formatCurrencyCompact(amount: number): FormattedCurrency {
     const display = rounded.toString();
     return {
       display: `${amount < 0 ? '-' : ''}$${display}`,
-      exact: `${amount < 0 ? '-' : ''}${exact}`,
+      exact: exact, // exactFormatter already includes the sign
     };
   } else if (absAmount < 10000) {
     // 1K to 9.9K: show 1 decimal place
@@ -36,7 +36,7 @@ export function formatCurrencyCompact(amount: number): FormattedCurrency {
     const rounded = Math.round(kValue * 10) / 10;
     return {
       display: `${amount < 0 ? '-' : ''}$${rounded.toFixed(1)}K`,
-      exact: `${amount < 0 ? '-' : ''}${exact}`,
+      exact: exact, // exactFormatter already includes the sign
     };
   } else if (absAmount < 100000) {
     // 10K to 99.9K: show 1 decimal place
@@ -45,7 +45,7 @@ export function formatCurrencyCompact(amount: number): FormattedCurrency {
     const rounded = Math.round(kValue * 10) / 10;
     return {
       display: `${amount < 0 ? '-' : ''}$${rounded.toFixed(1)}K`,
-      exact: `${amount < 0 ? '-' : ''}${exact}`,
+      exact: exact, // exactFormatter already includes the sign
     };
   } else {
     // 100K+: show whole number in K
@@ -53,7 +53,7 @@ export function formatCurrencyCompact(amount: number): FormattedCurrency {
     const kValue = Math.round(absAmount / 1000);
     return {
       display: `${amount < 0 ? '-' : ''}$${kValue}K`,
-      exact: `${amount < 0 ? '-' : ''}${exact}`,
+      exact: exact, // exactFormatter already includes the sign
     };
   }
 }
