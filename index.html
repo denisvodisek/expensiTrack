@@ -146,6 +146,20 @@
           document.documentElement.classList.add('dark');
         }
       })();
+
+      // PWA Install Prompt Handler
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('PWA install prompt available');
+        // You can show a custom install button here if needed
+      });
+
+      window.addEventListener('appinstalled', () => {
+        console.log('PWA was installed');
+        deferredPrompt = null;
+      });
     </script>
   <script type="importmap">
 {

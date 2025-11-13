@@ -1,18 +1,22 @@
 // Service Worker for ExpensiTrak PWA
 const CACHE_NAME = 'expensitrak-v1';
+const VERSION = 'v1';
 
 // Install event - cache resources
 self.addEventListener('install', (event) => {
+  console.log('Service Worker installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Opened cache');
-        // Cache essential resources
+        // Cache essential resources - use catch to prevent failures
         return cache.addAll([
           '/',
           '/index.html',
           '/manifest.json'
-        ]);
+        ]).catch((err) => {
+          console.log('Cache addAll failed:', err);
+        });
       })
   );
   // Force the waiting service worker to become the active service worker
