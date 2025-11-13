@@ -185,7 +185,7 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
                 statusText = 'Ambitious';
                 statusColor = 'text-yellow-500';
                 const savingsPercentage = (monthly / settings.monthlyIncome) * 100;
-                explanation = `You need to save ${formatCurrency(monthly).display} per month (${savingsPercentage.toFixed(0)}% of your income). This is ambitious but achievable with disciplined budgeting.`;
+                explanation = `You need to save ${formatCurrency(monthly).display} per month (${savingsPercentage.toFixed(0)}% of your income). This requires significant savings but is achievable with budgeting.`;
                 recommendations = [
                     `Track expenses: Review spending to find ${formatCurrency(monthly * 0.3).display}-${formatCurrency(monthly * 0.5).display} in potential savings`,
                     `Automate savings: Set up automatic transfers of ${formatCurrency(monthly).display} on payday`,
