@@ -171,7 +171,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
                             <h3 className="text-sm font-semibold text-muted-foreground mb-2">Payment Method</h3>
                             <div className="grid grid-cols-3 gap-2">
                                 {paymentMethods.map(method => (
-                                    <button type="button" key={method} onClick={() => setPaymentMethod(method)} className={`py-2 rounded-md text-sm font-semibold transition ${paymentMethod === method ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}>{method}</button>
+                                    <button type="button" key={method} onClick={() => setPaymentMethod(method)} className={`py-2 rounded-md text-xs font-semibold transition ${paymentMethod === method ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}>{method}</button>
                                 ))}
                             </div>
                             {paymentMethod === 'Credit Card' && activeCards.length > 0 && (
@@ -179,9 +179,9 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
                                    <h4 className="text-xs font-semibold text-muted-foreground mb-2">Select Credit Card</h4>
                                    <div className="grid grid-cols-2 gap-2">
                                         {activeCards.map(card => (
-                                            <button type="button" key={card.id} onClick={() => setCardId(card.id)} className={`p-3 border rounded-lg text-left text-sm transition-all flex items-center space-x-2 ${cardId === card.id ? 'border-primary bg-secondary ring-2 ring-primary' : 'border-border bg-card'}`}>
+                                            <button type="button" key={card.id} onClick={() => setCardId(card.id)} className={`p-3 border rounded-lg text-left text-xs transition-all flex items-center space-x-2 ${cardId === card.id ? 'border-primary bg-secondary ring-2 ring-primary' : 'border-border bg-card'}`}>
                                                 <CreditCardIcon className="w-5 h-5 text-muted-foreground"/>
-                                                <p className="font-semibold text-sm">{card.name}</p>
+                                                <p className="font-semibold text-xs">{card.name}</p>
                                             </button>
                                         ))}
                                    </div>
@@ -193,9 +193,9 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
                     <details className="space-y-3">
                          <summary className="text-sm text-muted-foreground cursor-pointer">Add more information</summary>
                          <div className="pt-2 space-y-3">
-                            <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description (optional)" className="w-full bg-input border border-border rounded-md px-3 py-2 text-foreground" />
+                            <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description (optional)" className="text-sm w-full bg-input border border-border rounded-md px-3 py-2 text-foreground" />
                             <div className="relative">
-                               <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-input border border-border rounded-md px-3 py-2 text-foreground appearance-none" />
+                               <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="text-sm w-full bg-input border border-border rounded-md px-3 py-2 text-foreground appearance-none" />
                             </div>
                         </div>
                     </details>
