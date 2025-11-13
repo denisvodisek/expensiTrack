@@ -100,7 +100,10 @@ export const ServiceWorkerManager: React.FC<ServiceWorkerManagerProps> = ({ chil
       {children}
       
       {updateAvailable && (
-        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 bg-card border border-border rounded-lg shadow-lg p-4 z-50">
+        <div 
+          className="fixed left-4 right-4 sm:left-auto sm:right-4 sm:w-96 bg-card border border-border rounded-lg shadow-lg p-4 z-50"
+          style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px) + 1rem)' }}
+        >
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               <h3 className="font-semibold text-sm mb-1">Update Available</h3>
