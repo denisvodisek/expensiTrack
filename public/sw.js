@@ -1,5 +1,5 @@
 // Version-based cache name - update this with each deployment
-const CACHE_VERSION = 'v1.0.2';
+const CACHE_VERSION = 'v1.0.3';
 const CACHE_NAME = `expensitrak-${CACHE_VERSION}`;
 
 const urlsToCache = [
