@@ -14,8 +14,7 @@ export default defineConfig(({ mode }) => {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'import.meta.env.VITE_USERNAME': JSON.stringify(env.USERNAME),
-        'import.meta.env.VITE_PASSWORD': JSON.stringify(env.PASSWORD),
-        'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || 'http://localhost:3001/api')
+        'import.meta.env.VITE_PASSWORD': JSON.stringify(env.PASSWORD)
       },
       resolve: {
         alias: {

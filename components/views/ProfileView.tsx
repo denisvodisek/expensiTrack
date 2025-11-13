@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useAppContext } from '../../contexts/AppContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { DeleteIcon, CheckCircleIcon, SunIcon, MoonIcon, PrivacyOnIcon, PrivacyOffIcon } from '../Icons';
 import PrivacyWrapper from '../PrivacyWrapper';
+import { downloadDataAsJson, importDataFromFile } from '../../services/api';
 
 const currencyFormatter = new Intl.NumberFormat('en-HK', { style: 'currency', currency: 'HKD' });
 
@@ -293,6 +294,8 @@ const SettingsSection: React.FC = () => {
     const { logout } = useAuth();
     const [monthlyIncome, setMonthlyIncome] = useState(settings?.monthlyIncome.toString() || '');
     const [saved, setSaved] = useState(false);
+    const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({ type: null, message: '' });
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     if(!settings) return null;
     
@@ -305,6 +308,37 @@ const SettingsSection: React.FC = () => {
 
     const toggleTheme = () => {
         updateSettings({ theme: settings.theme === 'dark' ? 'light' : 'dark' });
+    };
+
+    const handleImportClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!file.name.endsWith('.json')) {
+            setImportStatus({ type: 'error', message: 'Please select a JSON file' });
+            setTimeout(() => setImportStatus({ type: null, message: '' }), 3000);
+            return;
+        }
+
+        const result = await importDataFromFile(file);
+        if (result.success) {
+            setImportStatus({ type: 'success', message: 'Data imported successfully! Reloading...' });
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            setImportStatus({ type: 'error', message: result.error || 'Failed to import data' });
+            setTimeout(() => setImportStatus({ type: null, message: '' }), 5000);
+        }
+
+        // Reset file input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
     };
 
     return (
@@ -333,10 +367,42 @@ const SettingsSection: React.FC = () => {
                 </div>
             </form>
 
-            <div className="bg-card border border-border rounded-lg">
-                <button onClick={logout} className="w-full text-center text-destructive font-semibold p-3">
-                    Logout
-                </button>
+            <div className="bg-card border border-border p-4 rounded-lg space-y-2">
+                <div className="space-y-2">
+                    <button 
+                        onClick={downloadDataAsJson} 
+                        className="w-full bg-secondary hover:bg-secondary/80 text-foreground font-semibold py-2 px-4 rounded-md text-sm"
+                    >
+                        Export All Data (JSON)
+                    </button>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".json"
+                        onChange={handleFileChange}
+                        className="hidden"
+                    />
+                    <button 
+                        onClick={handleImportClick}
+                        className="w-full bg-secondary hover:bg-secondary/80 text-foreground font-semibold py-2 px-4 rounded-md text-sm"
+                    >
+                        Import Data (JSON)
+                    </button>
+                    {importStatus.type && (
+                        <div className={`p-2 rounded-md text-sm ${
+                            importStatus.type === 'success' 
+                                ? 'bg-green-500/20 text-green-400' 
+                                : 'bg-red-500/20 text-red-400'
+                        }`}>
+                            {importStatus.message}
+                        </div>
+                    )}
+                </div>
+                <div className="pt-2 border-t border-border">
+                    <button onClick={logout} className="w-full text-center text-destructive font-semibold py-2">
+                        Logout
+                    </button>
+                </div>
             </div>
         </section>
     );
