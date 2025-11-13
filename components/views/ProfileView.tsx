@@ -236,7 +236,7 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
             
             <div>
                 <ProgressBar label="Savings Pool" percentage={progressSavings} />
-                <div className="hidden sm:block h-2"></div>
+                <div className="block h-2"></div>
                 <ProgressBar label="Total Assets" percentage={progressAssets} colorClass="bg-blue-500" />
             </div>
 
@@ -267,9 +267,8 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
                                 </PrivacyWrapper>
                             </div>
                             {settings.monthlyIncome > 0 && (
-                                <div className="text-[10px] text-muted-foreground space-y-1">
+                                <div className="text-[10px] text-muted-foreground">
                                     <p>{((monthlySaving / settings.monthlyIncome) * 100).toFixed(0)}% of your monthly income</p>
-                                    <p>Time to goal: {insights.monthsLeft} months</p>
                                 </div>
                             )}
                         </div>
