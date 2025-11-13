@@ -172,7 +172,9 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
                 statusText = 'At Risk';
                 statusColor = 'text-red-500';
                 const progressPct = (settings.totalSavings / goal.targetAmount) * 100;
-                explanation = `You need to save ${formatCurrency(monthly).display} per month (${incomePercentage.toFixed(0)}% of your income), but your monthly income is only ${formatCurrency(settings.monthlyIncome).display}. This goal requires more than 100% of your income, making it financially unsustainable.`;
+                const additionalIncomeNeeded = monthly - settings.monthlyIncome;
+                const increasePercentage = (additionalIncomeNeeded / settings.monthlyIncome) * 100;
+                explanation = `You need to save ${formatCurrency(monthly).display} per month, but your monthly income is only ${formatCurrency(settings.monthlyIncome).display}. You would need to earn ${increasePercentage.toFixed(0)}% more (${formatCurrency(additionalIncomeNeeded).display}) to make this goal achievable.`;
                 recommendations = [
                     `Extend deadline: Moving the deadline by ${Math.ceil(monthsLeft * 0.5)} months would reduce monthly savings to ${formatCurrency(remainingAmount / (monthsLeft * 1.5)).display}`,
                     `Reduce target: Lowering the goal by 20% would require ${formatCurrency(goal.targetAmount * 0.8 * (1 - progressPct / 100) / monthsLeft).display} per month`,
@@ -182,7 +184,8 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
             } else if (settings.monthlyIncome > 0 && monthly > settings.monthlyIncome * 0.5) {
                 statusText = 'Ambitious';
                 statusColor = 'text-yellow-500';
-                explanation = `You need to save ${formatCurrency(monthly).display} per month (${incomePercentage.toFixed(0)}% of your income). This is ambitious but achievable with disciplined budgeting.`;
+                const savingsPercentage = (monthly / settings.monthlyIncome) * 100;
+                explanation = `You need to save ${formatCurrency(monthly).display} per month (${savingsPercentage.toFixed(0)}% of your income). This is ambitious but achievable with disciplined budgeting.`;
                 recommendations = [
                     `Track expenses: Review spending to find ${formatCurrency(monthly * 0.3).display}-${formatCurrency(monthly * 0.5).display} in potential savings`,
                     `Automate savings: Set up automatic transfers of ${formatCurrency(monthly).display} on payday`,
@@ -193,7 +196,8 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
                 statusText = 'On Track';
                 statusColor = 'text-green-500';
                 const progressPct = (settings.totalSavings / goal.targetAmount) * 100;
-                explanation = `You're making great progress! Save ${formatCurrency(monthly).display} per month (${incomePercentage.toFixed(0)}% of income) to reach your goal on time.`;
+                const savingsPercentage = (monthly / settings.monthlyIncome) * 100;
+                explanation = `You're making great progress! Save ${formatCurrency(monthly).display} per month (${savingsPercentage.toFixed(0)}% of income) to reach your goal on time.`;
                 recommendations = [
                     `Stay consistent: Automate ${formatCurrency(monthly).display} monthly savings`,
                     `Monitor progress: You're ${progressPct.toFixed(0)}% there - keep it up!`,
