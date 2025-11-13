@@ -27,7 +27,7 @@ A production-ready expense tracking application built with React and TypeScript.
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/denisvodisek/expensitrak.git
+   git clone git@github.com:denisvodisek/expensiTrack.git
    cd expensitrak
    ```
 
@@ -79,7 +79,7 @@ All data is stored in the browser's localStorage:
 
 1. **Push to GitHub** (if not already done):
    ```bash
-   git remote add origin https://github.com/denisvodisek/expensitrak.git
+   git remote add origin git@github.com:denisvodisek/expensiTrack.git
    git branch -M main
    git push -u origin main
    ```
