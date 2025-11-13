@@ -133,7 +133,7 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
     const { progressSavings, progressAssets, monthlySaving, status, insights } = useMemo(() => {
         const remainingAmount = Math.max(0, goal.targetAmount - settings.totalSavings);
         const daysLeft = (new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24);
-        const monthsLeft = daysLeft / 30.44;
+        const monthsLeft = Math.max(1, daysLeft / 30.44); // Ensure at least 1 month
 
         let statusText = 'On Track';
         let statusColor = 'text-green-500';
@@ -155,7 +155,17 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
                 'Consider breaking this into smaller, achievable milestones'
             ];
         } else {
-            monthly = remainingAmount / monthsLeft;
+            // Calculate monthly savings needed
+            if (daysLeft <= 0) {
+                // Deadline is past - spread remaining over 12 months
+                monthly = remainingAmount / 12;
+            } else if (daysLeft > 365 * 10) {
+                // Deadline is more than 10 years away - cap at reasonable timeframe
+                monthly = remainingAmount / (365 * 10 / 30.44); // 10 years in months
+            } else {
+                monthly = remainingAmount / monthsLeft;
+            }
+
             const incomePercentage = settings.monthlyIncome > 0 ? (monthly / settings.monthlyIncome) * 100 : 0;
             
             if (settings.monthlyIncome > 0 && monthly > settings.monthlyIncome) {
@@ -222,6 +232,7 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
             
             <div>
                 <ProgressBar label="Savings Pool" percentage={progressSavings} />
+                <div className="hidden sm:block h-2"></div>
                 <ProgressBar label="Total Assets" percentage={progressAssets} colorClass="bg-blue-500" />
             </div>
 
@@ -252,9 +263,10 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
                                 </PrivacyWrapper>
                             </div>
                             {settings.monthlyIncome > 0 && (
-                                <p className="text-[10px] text-muted-foreground">
-                                    {((monthlySaving / settings.monthlyIncome) * 100).toFixed(0)}% of your monthly income
-                                </p>
+                                <div className="text-[10px] text-muted-foreground space-y-1">
+                                    <p>{((monthlySaving / settings.monthlyIncome) * 100).toFixed(0)}% of your monthly income</p>
+                                    <p>Time to goal: {insights.monthsLeft} months</p>
+                                </div>
                             )}
                         </div>
                     )}
