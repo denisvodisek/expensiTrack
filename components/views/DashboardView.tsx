@@ -68,20 +68,38 @@ const DashboardView: React.FC = () => {
                 </button>
             </header>
             
-            <div className="grid grid-cols-3 gap-2 sm:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
                 <StatCard title="Income" value={currencyFormatter.format(monthlyIncome)} color="text-green-500" />
                 <StatCard title="Expense" value={currencyFormatter.format(monthlyExpense)} color="text-red-500" />
-                <StatCard title="Net Flow" value={currencyFormatter.format(netFlow)} color={netFlow >= 0 ? 'text-green-500' : 'text-red-500'} />
+                <StatCard title="Net Flow" value={currencyFormatter.format(netFlow)} color={netFlow >= 0 ? 'text-green-500' : 'text-red-500'} className="col-span-2 md:col-span-1" />
             </div>
 
              <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
                 <h2 className="text-base sm:text-lg font-semibold font-display mb-2">Daily Flow (This Month)</h2>
                 <div className="h-48">
                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={barChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                        <BarChart data={barChartData} margin={{ top: 5, right: 5, left: 0, bottom: 60 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                            <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} fontSize={12} />
-                            <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} fontSize={12} tickFormatter={(value) => `$${value/1000}k`} />
+                            <XAxis 
+                                dataKey="name" 
+                                tick={{ fill: 'hsl(var(--muted-foreground))' }} 
+                                fontSize={10}
+                                angle={-45}
+                                textAnchor="end"
+                                height={60}
+                                interval={0}
+                            />
+                            <YAxis 
+                                tick={{ fill: 'hsl(var(--muted-foreground))' }} 
+                                fontSize={10}
+                                width={40}
+                                tickFormatter={(value) => {
+                                    if (value >= 1000) {
+                                        return `$${(value / 1000).toFixed(1)}k`;
+                                    }
+                                    return `$${value}`;
+                                }}
+                            />
                             <Tooltip
                                 cursor={{fill: 'hsl(var(--secondary))'}}
                                 contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}
@@ -149,8 +167,8 @@ const DashboardView: React.FC = () => {
     );
 };
 
-const StatCard: React.FC<{title: string; value: string; color?: string}> = ({ title, value, color }) => (
-    <div className="bg-card border border-border p-2 sm:p-4 rounded-lg col-span-1">
+const StatCard: React.FC<{title: string; value: string; color?: string; className?: string}> = ({ title, value, color, className = '' }) => (
+    <div className={`bg-card border border-border p-2 sm:p-4 rounded-lg col-span-1 ${className}`}>
         <h3 className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{title}</h3>
         <p className={`text-lg sm:text-xl md:text-2xl font-bold mt-1 font-numbers break-words ${color || 'text-foreground'}`}><PrivacyWrapper>{value}</PrivacyWrapper></p>
     </div>
