@@ -4,13 +4,37 @@ import { useAppContext } from '@/contexts/AppContext';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
 import PrivacyWrapper from '@/components/PrivacyWrapper';
 import { PrivacyOnIcon, PrivacyOffIcon, CreditCardIcon } from '@/components/Icons';
+import { formatCurrency } from '@/lib/currency';
 
 const currencyFormatter = new Intl.NumberFormat('en-HK', { style: 'currency', currency: 'HKD' });
 const PIE_COLORS = ['#16a34a', '#3b82f6', '#f97316', '#ef4444', '#8b5cf6', '#ec4899', '#fde047', '#22d3ee'];
 
 
 const DashboardView: React.FC = () => {
-    const { transactions, settings, cards, updateSettings, loading } = useAppContext();
+    const { transactions, settings, cards, updateSettings, loading, addTransaction } = useAppContext();
+    const [payingCardId, setPayingCardId] = React.useState<string | null>(null);
+    const [paymentAmount, setPaymentAmount] = React.useState('');
+
+    const handlePayCard = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (payingCardId && paymentAmount && settings) {
+            const amount = parseFloat(paymentAmount);
+            const card = cards.find(c => c.id === payingCardId);
+            if (card && amount > 0 && amount <= card.balance && amount <= settings.totalSavings) {
+                await addTransaction({
+                    type: 'credit_card_payment',
+                    amount,
+                    category: 'Credit Card Payment',
+                    description: `Payment for ${card.name}`,
+                    paymentMethod: 'Bank',
+                    cardId: payingCardId,
+                    date: new Date().toISOString().split('T')[0],
+                });
+                setPayingCardId(null);
+                setPaymentAmount('');
+            }
+        }
+    };
 
     if (loading || !settings) {
         return <div className="p-4 text-center">Loading...</div>;
@@ -79,9 +103,9 @@ const DashboardView: React.FC = () => {
             </header>
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
-                <StatCard title="Income" value={currencyFormatter.format(monthlyIncome)} color="text-green-500" />
-                <StatCard title="Expense" value={currencyFormatter.format(monthlyExpense)} color="text-red-500" />
-                <StatCard title="Net Flow" value={currencyFormatter.format(netFlow)} color={netFlow >= 0 ? 'text-green-500' : 'text-red-500'} className="col-span-2 md:col-span-1" />
+                <StatCard title="Income" amount={monthlyIncome} color="text-green-500" />
+                <StatCard title="Expense" amount={monthlyExpense} color="text-red-500" />
+                <StatCard title="Net Flow" amount={netFlow} color={netFlow >= 0 ? 'text-green-500' : 'text-red-500'} className="col-span-2 md:col-span-1" />
             </div>
 
              <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
@@ -185,9 +209,47 @@ const DashboardView: React.FC = () => {
                                     <div className="bg-primary h-2 rounded-full" style={{ width: `${utilization}%` }}></div>
                                 </div>
                                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                                    <span className="font-numbers"><PrivacyWrapper>{currencyFormatter.format(card.balance)}</PrivacyWrapper></span>
-                                    <span className="font-numbers"><PrivacyWrapper>{currencyFormatter.format(card.limit)}</PrivacyWrapper></span>
+                                    <div className="font-numbers">
+                                        <PrivacyWrapper>
+                                            <div>{formatCurrency(card.balance).display}</div>
+                                            <div className="text-[10px] opacity-70">{formatCurrency(card.balance).exact}</div>
+                                        </PrivacyWrapper>
+                                    </div>
+                                    <div className="font-numbers">
+                                        <PrivacyWrapper>
+                                            <div>{formatCurrency(card.limit).display}</div>
+                                            <div className="text-[10px] opacity-70">{formatCurrency(card.limit).exact}</div>
+                                        </PrivacyWrapper>
+                                    </div>
                                 </div>
+                                {card.balance > 0 && (
+                                    <div className="pt-2 border-t border-border mt-2">
+                                        {payingCardId === card.id ? (
+                                            <form onSubmit={handlePayCard} className="flex gap-2">
+                                                <input 
+                                                    type="number" 
+                                                    placeholder="Amount" 
+                                                    value={paymentAmount} 
+                                                    onChange={e => setPaymentAmount(e.target.value)} 
+                                                    required 
+                                                    min="0.01"
+                                                    max={Math.min(card.balance, settings?.totalSavings || 0)}
+                                                    step="0.01"
+                                                    className="flex-1 bg-input p-2 rounded-md font-numbers text-xs sm:text-sm"
+                                                />
+                                                <button type="submit" className="bg-green-600 text-white font-bold px-3 py-2 rounded-md text-xs sm:text-sm whitespace-nowrap">Pay</button>
+                                                <button type="button" onClick={() => { setPayingCardId(null); setPaymentAmount(''); }} className="bg-secondary text-foreground px-3 py-2 rounded-md text-xs sm:text-sm">Cancel</button>
+                                            </form>
+                                        ) : (
+                                            <button 
+                                                onClick={() => setPayingCardId(card.id)} 
+                                                className="w-full bg-green-600 text-white font-bold py-2 rounded-md text-xs sm:text-sm"
+                                            >
+                                                Pay Credit Card
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         )
                     }) : (
@@ -200,11 +262,17 @@ const DashboardView: React.FC = () => {
     );
 };
 
-const StatCard: React.FC<{title: string; value: string; color?: string; className?: string}> = ({ title, value, color, className = '' }) => (
-    <div className={`bg-card border border-border p-2 sm:p-4 rounded-lg col-span-1 ${className}`}>
-        <h3 className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{title}</h3>
-        <p className={`text-lg sm:text-xl md:text-2xl font-bold mt-1 font-numbers break-words ${color || 'text-foreground'}`}><PrivacyWrapper>{value}</PrivacyWrapper></p>
-    </div>
-);
+const StatCard: React.FC<{title: string; amount: number; color?: string; className?: string}> = ({ title, amount, color, className = '' }) => {
+    const formatted = formatCurrency(amount);
+    return (
+        <div className={`bg-card border border-border p-2 sm:p-4 rounded-lg col-span-1 ${className}`}>
+            <h3 className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{title}</h3>
+            <PrivacyWrapper>
+                <p className={`text-lg sm:text-xl md:text-2xl font-bold mt-1 font-numbers break-words ${color || 'text-foreground'}`}>{formatted.display}</p>
+                <p className={`text-[10px] opacity-70 font-numbers ${color || 'text-foreground'}`}>{formatted.exact}</p>
+            </PrivacyWrapper>
+        </div>
+    );
+};
 
 export default DashboardView;

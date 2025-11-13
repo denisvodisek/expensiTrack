@@ -4,6 +4,7 @@ import type { Transaction } from '@/types';
 import { EditIcon, DeleteIcon } from '@/components/Icons';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
 import PrivacyWrapper from '@/components/PrivacyWrapper';
+import { formatCurrency } from '@/lib/currency';
 
 const currencyFormatter = new Intl.NumberFormat('en-HK', { style: 'currency', currency: 'HKD' });
 const PIE_COLORS = ['#16a34a', '#3b82f6', '#f97316', '#ef4444', '#8b5cf6', '#ec4899', '#fde047', '#22d3ee'];
@@ -30,10 +31,15 @@ const TransactionListItem: React.FC<{ transaction: Transaction; onEdit: () => vo
                 </div>
             </div>
             <div className="text-right flex items-center space-x-2 flex-shrink-0">
-                 <p className={`font-bold text-sm font-numbers whitespace-nowrap ${transaction.type === 'income' ? 'text-green-400' : transaction.type === 'credit_card_payment' ? 'text-blue-400' : 'text-foreground'}`}>
-                    {transaction.type === 'income' ? '+' : transaction.type === 'credit_card_payment' ? '↻' : '-'}
-                    {currencyFormatter.format(transaction.amount)}
-                </p>
+                <div>
+                    <p className={`font-bold text-sm font-numbers whitespace-nowrap ${transaction.type === 'income' ? 'text-green-400' : transaction.type === 'credit_card_payment' ? 'text-blue-400' : 'text-foreground'}`}>
+                        {transaction.type === 'income' ? '+' : transaction.type === 'credit_card_payment' ? '↻' : '-'}
+                        {formatCurrency(transaction.amount).display}
+                    </p>
+                    <p className={`text-[10px] opacity-70 font-numbers ${transaction.type === 'income' ? 'text-green-400' : transaction.type === 'credit_card_payment' ? 'text-blue-400' : 'text-foreground'}`}>
+                        {formatCurrency(transaction.amount).exact}
+                    </p>
+                </div>
                 <div className="flex items-center space-x-1.5">
                    <button onClick={onEdit} className="text-muted-foreground hover:text-blue-400"><EditIcon className="w-3.5 h-3.5"/></button>
                    <button onClick={onDelete} className="text-muted-foreground hover:text-red-400"><DeleteIcon className="w-3.5 h-3.5"/></button>
@@ -180,9 +186,9 @@ const ChartsView: React.FC<{transactions: Transaction[]}> = ({ transactions }) =
     return (
         <div className="space-y-4">
              <div className="grid grid-cols-3 gap-2 sm:gap-4">
-                <StatCard title="Income" value={currencyFormatter.format(totalIncome)} color="text-green-500" />
-                <StatCard title="Expense" value={currencyFormatter.format(totalExpense)} color="text-red-500" />
-                <StatCard title="Net Flow" value={currencyFormatter.format(netFlow)} color={netFlow >= 0 ? 'text-green-500' : 'text-red-500'} />
+                <StatCard title="Income" amount={totalIncome} color="text-green-500" />
+                <StatCard title="Expense" amount={totalExpense} color="text-red-500" />
+                <StatCard title="Net Flow" amount={netFlow} color={netFlow >= 0 ? 'text-green-500' : 'text-red-500'} />
             </div>
             <div className="grid md:grid-cols-2 gap-4">
                 <div className="bg-card border border-border p-4 rounded-lg">
@@ -219,12 +225,18 @@ const ChartsView: React.FC<{transactions: Transaction[]}> = ({ transactions }) =
     );
 };
 
-const StatCard: React.FC<{title: string; value: string; color?: string}> = ({ title, value, color }) => (
-    <div className="bg-card border border-border p-2 sm:p-3 rounded-lg col-span-1 text-center">
-        <h3 className="text-xs font-medium text-muted-foreground truncate">{title}</h3>
-        <p className={`text-base sm:text-lg md:text-xl font-bold font-numbers break-words ${color || 'text-foreground'}`}><PrivacyWrapper>{value}</PrivacyWrapper></p>
-    </div>
-);
+const StatCard: React.FC<{title: string; amount: number; color?: string}> = ({ title, amount, color }) => {
+    const formatted = formatCurrency(amount);
+    return (
+        <div className="bg-card border border-border p-2 sm:p-3 rounded-lg col-span-1 text-center">
+            <h3 className="text-xs font-medium text-muted-foreground truncate">{title}</h3>
+            <PrivacyWrapper>
+                <p className={`text-base sm:text-lg md:text-xl font-bold font-numbers break-words ${color || 'text-foreground'}`}>{formatted.display}</p>
+                <p className={`text-[10px] opacity-70 font-numbers ${color || 'text-foreground'}`}>{formatted.exact}</p>
+            </PrivacyWrapper>
+        </div>
+    );
+};
 
 
 export default TransactionsView;

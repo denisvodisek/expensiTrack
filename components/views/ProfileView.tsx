@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { DeleteIcon, CheckCircleIcon, SunIcon, MoonIcon, PrivacyOnIcon, PrivacyOffIcon } from '@/components/Icons';
 import PrivacyWrapper from '@/components/PrivacyWrapper';
 import { downloadDataAsJson, importDataFromFile } from '@/services/api';
+import { formatCurrency } from '@/lib/currency';
 
 const currencyFormatter = new Intl.NumberFormat('en-HK', { style: 'currency', currency: 'HKD' });
 
@@ -56,16 +57,25 @@ const NetWorthSection: React.FC = () => {
             <h2 className="text-lg sm:text-xl font-semibold font-display">Net Worth</h2>
             <div className="bg-card border border-border p-4 sm:p-6 rounded-lg text-center">
                 <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Total Net Worth</h3>
-                <p className="text-2xl sm:text-3xl md:text-4xl font-bold mt-1 tracking-tight font-numbers break-words"><PrivacyWrapper>{currencyFormatter.format(netWorth)}</PrivacyWrapper></p>
+                <PrivacyWrapper>
+                    <p className="text-2xl sm:text-3xl md:text-4xl font-bold mt-1 tracking-tight font-numbers break-words">{formatCurrency(netWorth).display}</p>
+                    <p className="text-xs opacity-70 font-numbers">{formatCurrency(netWorth).exact}</p>
+                </PrivacyWrapper>
             </div>
              <div className="grid grid-cols-2 gap-2 sm:gap-4 text-center">
                 <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
                     <h3 className="text-xs sm:text-sm text-green-400 font-semibold">Total Assets</h3>
-                    <p className="text-sm sm:text-base md:text-lg font-bold font-numbers break-words"><PrivacyWrapper>{currencyFormatter.format(settings.totalSavings + totalAssetsValue)}</PrivacyWrapper></p>
+                    <PrivacyWrapper>
+                        <p className="text-sm sm:text-base md:text-lg font-bold font-numbers break-words">{formatCurrency(settings.totalSavings + totalAssetsValue).display}</p>
+                        <p className="text-[10px] opacity-70 font-numbers">{formatCurrency(settings.totalSavings + totalAssetsValue).exact}</p>
+                    </PrivacyWrapper>
                 </div>
                  <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
                     <h3 className="text-xs sm:text-sm text-red-400 font-semibold">Total Liabilities</h3>
-                    <p className="text-sm sm:text-base md:text-lg font-bold font-numbers break-words"><PrivacyWrapper>{currencyFormatter.format(totalLiabilities)}</PrivacyWrapper></p>
+                    <PrivacyWrapper>
+                        <p className="text-sm sm:text-base md:text-lg font-bold font-numbers break-words">{formatCurrency(totalLiabilities).display}</p>
+                        <p className="text-[10px] opacity-70 font-numbers">{formatCurrency(totalLiabilities).exact}</p>
+                    </PrivacyWrapper>
                 </div>
             </div>
             
@@ -165,10 +175,15 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
                 </div>
                 <button onClick={() => deleteGoal(goal.id)} className="text-muted-foreground hover:text-destructive"><DeleteIcon className="w-4 h-4"/></button>
             </div>
-            <p className="text-base sm:text-lg font-semibold font-numbers break-words">
-                <PrivacyWrapper>{currencyFormatter.format(settings.totalSavings)}</PrivacyWrapper>
-                <span className="text-xs sm:text-sm text-muted-foreground"> / <PrivacyWrapper>{currencyFormatter.format(goal.targetAmount)}</PrivacyWrapper></span>
-            </p>
+            <PrivacyWrapper>
+                <p className="text-base sm:text-lg font-semibold font-numbers break-words">
+                    {formatCurrency(settings.totalSavings).display}
+                    <span className="text-xs sm:text-sm text-muted-foreground"> / {formatCurrency(goal.targetAmount).display}</span>
+                </p>
+                <p className="text-[10px] opacity-70 font-numbers">
+                    {formatCurrency(settings.totalSavings).exact} / {formatCurrency(goal.targetAmount).exact}
+                </p>
+            </PrivacyWrapper>
             
             <div>
                 <ProgressBar label="Savings Pool" percentage={progressSavings} />
@@ -179,11 +194,17 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
                  <div className="text-xs text-muted-foreground grid grid-cols-2 gap-2 text-center pt-2">
                     <div className="bg-secondary p-1 rounded">
                         <p>Req. Daily Saving</p>
-                        <p className="font-bold text-foreground"><PrivacyWrapper>{currencyFormatter.format(dailySaving)}</PrivacyWrapper></p>
+                        <PrivacyWrapper>
+                            <p className="font-bold text-foreground">{formatCurrency(dailySaving).display}</p>
+                            <p className="text-[10px] opacity-70 font-numbers">{formatCurrency(dailySaving).exact}</p>
+                        </PrivacyWrapper>
                     </div>
                     <div className="bg-secondary p-1 rounded">
                         <p>Req. Monthly Saving</p>
-                        <p className="font-bold text-foreground"><PrivacyWrapper>{currencyFormatter.format(monthlySaving)}</PrivacyWrapper></p>
+                        <PrivacyWrapper>
+                            <p className="font-bold text-foreground">{formatCurrency(monthlySaving).display}</p>
+                            <p className="text-[10px] opacity-70 font-numbers">{formatCurrency(monthlySaving).exact}</p>
+                        </PrivacyWrapper>
                     </div>
                 </div>
             )}
@@ -307,8 +328,20 @@ const CardsSection: React.FC = () => {
                                 <div className="bg-primary h-2 rounded-full" style={{ width: `${utilization}%` }}></div>
                             </div>
                             <div className="flex justify-between text-xs sm:text-sm text-muted-foreground">
-                                <span className="font-numbers">Bal: <PrivacyWrapper>{currencyFormatter.format(card.balance)}</PrivacyWrapper></span>
-                                <span className="font-numbers">Limit: <PrivacyWrapper>{currencyFormatter.format(card.limit)}</PrivacyWrapper></span>
+                                <div className="font-numbers">
+                                    <span>Bal: </span>
+                                    <PrivacyWrapper>
+                                        <div>{formatCurrency(card.balance).display}</div>
+                                        <div className="text-[10px] opacity-70">{formatCurrency(card.balance).exact}</div>
+                                    </PrivacyWrapper>
+                                </div>
+                                <div className="font-numbers">
+                                    <span>Limit: </span>
+                                    <PrivacyWrapper>
+                                        <div>{formatCurrency(card.limit).display}</div>
+                                        <div className="text-[10px] opacity-70">{formatCurrency(card.limit).exact}</div>
+                                    </PrivacyWrapper>
+                                </div>
                             </div>
                             {card.balance > 0 && (
                                 <div className="pt-2 border-t border-border">
