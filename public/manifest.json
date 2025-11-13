@@ -1,0 +1,81 @@
+{
+  "id": "/",
+  "short_name": "ExpensiTrak",
+  "name": "ExpensiTrak",
+  "description": "Track your expenses and manage your finances",
+  "icons": [
+    {
+      "src": "/icon-16.png",
+      "type": "image/png",
+      "sizes": "16x16",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-32.png",
+      "type": "image/png",
+      "sizes": "32x32",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-64.png",
+      "type": "image/png",
+      "sizes": "64x64",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-114.png",
+      "type": "image/png",
+      "sizes": "114x114",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-144.png",
+      "type": "image/png",
+      "sizes": "144x144",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-256.png",
+      "type": "image/png",
+      "sizes": "256x256",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0f172a",
+  "display": "standalone",
+  "scope": "/",
+  "orientation": "portrait-primary",
+  "theme_color": "#0f172a",
+  "categories": ["finance", "productivity"],
+  "lang": "en",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "screenshots": [
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "form_factor": "narrow"
+    }
+  ]
+}
