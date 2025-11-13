@@ -1,0 +1,228 @@
+import React, { useState, useMemo } from 'react';
+import { useAppContext } from '../../contexts/AppContext';
+import type { Transaction } from '../../types';
+import { EditIcon, DeleteIcon } from '../Icons';
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
+import PrivacyWrapper from '../PrivacyWrapper';
+
+const currencyFormatter = new Intl.NumberFormat('en-HK', { style: 'currency', currency: 'HKD' });
+const PIE_COLORS = ['#16a34a', '#3b82f6', '#f97316', '#ef4444', '#8b5cf6', '#ec4899', '#fde047', '#22d3ee'];
+
+
+interface TransactionsViewProps {
+    onEditTransaction: (transaction: Transaction) => void;
+}
+
+const TransactionListItem: React.FC<{ transaction: Transaction; onEdit: () => void; onDelete: () => void; }> = ({ transaction, onEdit, onDelete }) => {
+    const { getCardById, categories } = useAppContext();
+    const paymentDetail = transaction.paymentMethod === 'Credit Card' && transaction.cardId ? getCardById(transaction.cardId)?.name : transaction.paymentMethod;
+    const category = categories.find(c => c.name === transaction.category);
+
+    return (
+        <div className="bg-card p-3 rounded-lg flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+                <div className="bg-secondary p-2 rounded-md text-xl">
+                    <span>{category?.emoji || '-'}</span>
+                </div>
+                <div>
+                    <p className="font-semibold">{transaction.category}</p>
+                    <p className="text-sm text-muted-foreground">{transaction.description || (transaction.type === 'expense' ? paymentDetail : 'Income')}</p>
+                </div>
+            </div>
+            <div className="text-right flex items-center space-x-4">
+                 <p className={`font-bold text-lg font-display ${transaction.type === 'income' ? 'text-green-400' : 'text-foreground'}`}>
+                    {transaction.type === 'income' ? '+' : '-'}
+                    {currencyFormatter.format(transaction.amount)}
+                </p>
+                <div className="flex items-center space-x-2">
+                   <button onClick={onEdit} className="text-muted-foreground hover:text-blue-400"><EditIcon className="w-4 h-4"/></button>
+                   <button onClick={onDelete} className="text-muted-foreground hover:text-red-400"><DeleteIcon className="w-4 h-4"/></button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const TransactionsView: React.FC<TransactionsViewProps> = ({ onEditTransaction }) => {
+    const { transactions, deleteTransaction, loading } = useAppContext();
+    const [filterPeriod, setFilterPeriod] = useState('month');
+
+    const filteredTransactions = useMemo(() => {
+        const now = new Date();
+        const todayEnd = new Date();
+        todayEnd.setHours(23, 59, 59, 999);
+
+        let startDate = new Date(0);
+        let endDate: Date | null = todayEnd;
+
+        switch (filterPeriod) {
+            case 'week':
+                startDate = new Date();
+                startDate.setDate(now.getDate() - 6);
+                startDate.setHours(0, 0, 0, 0);
+                break;
+            case 'month': // This Month
+                startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                break;
+            case 'last-month':
+                 startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                 endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+                break;
+            case 'quarter': // Last 3 Months
+                startDate = new Date();
+                startDate.setMonth(now.getMonth() - 3);
+                break;
+        }
+
+        return transactions
+            .filter(t => {
+                const tDate = new Date(t.date);
+                return tDate >= startDate && tDate <= (endDate || todayEnd);
+            })
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }, [transactions, filterPeriod]);
+    
+    const groupedTransactions = useMemo(() => {
+        return filteredTransactions.reduce((acc, transaction) => {
+            const date = new Date(transaction.date).toDateString();
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(transaction);
+            return acc;
+        }, {} as Record<string, Transaction[]>);
+    }, [filteredTransactions]);
+
+    return (
+        <div className="p-4 space-y-4">
+            <h1 className="text-3xl font-bold text-foreground font-display">Transactions</h1>
+            
+            <div className="flex space-x-2 bg-secondary p-1 rounded-md">
+                <FilterButton label="This Week" period="week" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
+                <FilterButton label="This Month" period="month" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
+                <FilterButton label="Last Month" period="last-month" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
+                <FilterButton label="3 Months" period="quarter" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
+            </div>
+
+            <ChartsView transactions={filteredTransactions} />
+
+            {loading ? (
+                <p>Loading transactions...</p>
+            ) : Object.keys(groupedTransactions).length === 0 ? (
+                <div className="text-center text-muted-foreground mt-16">
+                    <p className="text-4xl mb-2">📄</p>
+                    <p>No transactions found for this period.</p>
+                </div>
+            ) : (
+                Object.keys(groupedTransactions).map((date) => (
+                    <div key={date}>
+                        <h2 className="text-muted-foreground font-semibold my-2 text-sm">{new Date(date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h2>
+                        <div className="space-y-2">
+                            {groupedTransactions[date].map(transaction => (
+                                <TransactionListItem
+                                    key={transaction.id}
+                                    transaction={transaction}
+                                    onEdit={() => onEditTransaction(transaction)}
+                                    onDelete={() => deleteTransaction(transaction.id)}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                ))
+            )}
+        </div>
+    );
+};
+
+const FilterButton: React.FC<{label: string; period: string; activePeriod: string; setPeriod: (p: string) => void}> = 
+    ({label, period, activePeriod, setPeriod}) => (
+    <button onClick={() => setPeriod(period)} className={`w-full py-1.5 rounded text-sm font-semibold transition-colors ${activePeriod === period ? 'bg-background shadow' : 'text-muted-foreground'}`}>{label}</button>
+);
+
+
+const ChartsView: React.FC<{transactions: Transaction[]}> = ({ transactions }) => {
+    const { totalIncome, totalExpense, netFlow } = useMemo(() => {
+        const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+        const expense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+        return { totalIncome: income, totalExpense: expense, netFlow: income - expense };
+    }, [transactions]);
+    
+    const categorySpending = useMemo(() => transactions.filter(t => t.type === 'expense').reduce((acc, t) => {
+        acc[t.category] = (acc[t.category] || 0) + t.amount;
+        return acc;
+    }, {} as Record<string, number>), [transactions]);
+
+    const pieChartData = Object.entries(categorySpending).map(([name, value]) => ({ name, value }));
+
+    const dailyFlowData = useMemo(() => {
+        const grouped = transactions.reduce((acc, t) => {
+            const date = new Date(t.date).toLocaleDateString();
+             if (!acc[date]) {
+                acc[date] = { income: 0, expense: 0 };
+            }
+            if (t.type === 'income') acc[date].income += t.amount;
+            else acc[date].expense += t.amount;
+            return acc;
+        }, {} as Record<string, {income: number; expense: number}>);
+
+        return Object.keys(grouped).map(date => ({
+            name: new Date(date).toLocaleDateString(undefined, {month: 'short', day: 'numeric'}),
+            date: new Date(date),
+            Income: grouped[date].income,
+            Expense: grouped[date].expense
+        })).sort((a,b) => a.date.getTime() - b.date.getTime());
+    }, [transactions]);
+    
+    if (transactions.length === 0) return null;
+
+    return (
+        <div className="space-y-4">
+             <div className="grid grid-cols-3 gap-4">
+                <StatCard title="Income" value={currencyFormatter.format(totalIncome)} color="text-green-500" />
+                <StatCard title="Expense" value={currencyFormatter.format(totalExpense)} color="text-red-500" />
+                <StatCard title="Net Flow" value={currencyFormatter.format(netFlow)} color={netFlow >= 0 ? 'text-green-500' : 'text-red-500'} />
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+                <div className="bg-card border border-border p-4 rounded-lg">
+                    <h2 className="text-lg font-semibold font-display mb-2">Category Breakdown</h2>
+                    <div className="h-48">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} innerRadius={50} fill="#8884d8" paddingAngle={5} stroke="none">
+                                    {pieChartData.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
+                                </Pie>
+                                <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }} itemStyle={{ color: 'hsl(var(--foreground))' }} />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+                <div className="bg-card border border-border p-4 rounded-lg">
+                    <h2 className="text-lg font-semibold font-display mb-2">Daily Flow</h2>
+                    <div className="h-48">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={dailyFlowData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                                <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} fontSize={12} />
+                                <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} fontSize={12} tickFormatter={(value) => `$${value/1000}k`} />
+                                <Tooltip cursor={{fill: 'hsl(var(--secondary))'}} contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }} itemStyle={{ fontWeight: 'bold' }} labelStyle={{ color: 'hsl(var(--muted-foreground))', fontWeight: 'bold' }}/>
+                                <Legend wrapperStyle={{fontSize: "12px"}}/>
+                                <Bar dataKey="Income" fill="#16a34a" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="Expense" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const StatCard: React.FC<{title: string; value: string; color?: string}> = ({ title, value, color }) => (
+    <div className="bg-card border border-border p-3 rounded-lg col-span-1 text-center">
+        <h3 className="text-xs font-medium text-muted-foreground">{title}</h3>
+        <p className={`text-xl font-bold font-display ${color || 'text-foreground'}`}><PrivacyWrapper>{value}</PrivacyWrapper></p>
+    </div>
+);
+
+
+export default TransactionsView;

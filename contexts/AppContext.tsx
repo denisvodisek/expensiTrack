@@ -1,0 +1,209 @@
+
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import type { Transaction, Category, CreditCard, Goal, Asset, AppSettings } from '../types';
+import * as api from '../services/api';
+
+interface AppContextType {
+    transactions: Transaction[];
+    categories: Category[];
+    cards: CreditCard[];
+    goals: Goal[];
+    assets: Asset[];
+    settings: AppSettings | null;
+    loading: boolean;
+    addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<void>;
+    updateTransaction: (transaction: Transaction) => Promise<void>;
+    deleteTransaction: (id: string) => Promise<void>;
+    addCategory: (category: Omit<Category, 'id'>) => Promise<void>;
+    addCard: (card: Omit<CreditCard, 'id' | 'balance' | 'archived'>) => Promise<void>;
+    updateCard: (card: CreditCard) => Promise<void>;
+    archiveCard: (id: string) => Promise<void>;
+    addGoal: (goal: Omit<Goal, 'id'>) => Promise<void>;
+    updateGoal: (goal: Goal) => Promise<void>;
+    deleteGoal: (id: string) => Promise<void>;
+    addAsset: (asset: Omit<Asset, 'id' | 'lastUpdated'>) => Promise<void>;
+    updateAsset: (asset: Asset) => Promise<void>;
+    deleteAsset: (id: string) => Promise<void>;
+    updateSettings: (newSettings: Partial<AppSettings>) => Promise<void>;
+    getCardById: (id: string) => CreditCard | undefined;
+}
+
+const AppContext = createContext<AppContextType | undefined>(undefined);
+
+const applyTheme = (theme: 'light' | 'dark') => {
+    const root = document.documentElement;
+    root.classList.remove('light', 'dark');
+    root.classList.add(theme);
+    const themeColor = theme === 'dark' ? '#000000' : '#ffffff';
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColor);
+};
+
+export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [cards, setCards] = useState<CreditCard[]>([]);
+    const [goals, setGoals] = useState<Goal[]>([]);
+    const [assets, setAssets] = useState<Asset[]>([]);
+    const [settings, setSettings] = useState<AppSettings | null>(null);
+    const [loading, setLoading] = useState(true);
+    
+    const loadData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const currentSettings = await api.getSettings();
+            const [transactionsData, categoriesData, cardsData, goalsData, assetsData] = await Promise.all([
+                api.getTransactions(),
+                api.getCategories(),
+                api.getCards(),
+                api.getGoals(),
+                api.getAssets()
+            ]);
+            setTransactions(transactionsData);
+            setCategories(categoriesData);
+            setCards(cardsData);
+            setGoals(goalsData);
+            setAssets(assetsData);
+            setSettings(currentSettings);
+            applyTheme(currentSettings.theme);
+        } catch (error) {
+            console.error("Failed to load data", error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    const addTransaction = async (transactionData: Omit<Transaction, 'id'>) => {
+        const newTransaction = await api.addTransaction(transactionData);
+        setTransactions(prev => [...prev, newTransaction]);
+        
+        if (transactionData.type === 'expense' && transactionData.cardId) {
+            const card = cards.find(c => c.id === transactionData.cardId);
+            if (card) {
+                const updatedCard = { ...card, balance: card.balance + transactionData.amount };
+                await api.updateCard(updatedCard);
+                setCards(prev => prev.map(c => c.id === updatedCard.id ? updatedCard : c));
+            }
+        } else if (transactionData.type === 'income' && settings) {
+            await updateSettings({ totalSavings: settings.totalSavings + transactionData.amount });
+        }
+    };
+    
+    const updateTransaction = async (transactionData: Transaction) => {
+        const oldTransaction = transactions.find(t => t.id === transactionData.id);
+        if (!oldTransaction) return;
+
+        const updatedTransaction = await api.updateTransaction(transactionData);
+        setTransactions(prev => prev.map(t => t.id === updatedTransaction.id ? updatedTransaction : t));
+        
+        // This logic requires careful state management. For simplicity, we refetch cards. A more optimized approach would calculate the deltas.
+        await loadData();
+    };
+
+    const deleteTransaction = async (id: string) => {
+        const transactionToDelete = transactions.find(e => e.id === id);
+        if (!transactionToDelete) return;
+
+        await api.deleteTransaction(id);
+        setTransactions(prev => prev.filter(e => e.id !== id));
+        if (transactionToDelete.type === 'expense' && transactionToDelete.cardId) {
+            const card = cards.find(c => c.id === transactionToDelete.cardId);
+            if (card) {
+                const updatedCard = { ...card, balance: card.balance - transactionToDelete.amount };
+                await api.updateCard(updatedCard);
+                setCards(prev => prev.map(c => c.id === updatedCard.id ? updatedCard : c));
+            }
+        } else if (transactionToDelete.type === 'income' && settings) {
+             await updateSettings({ totalSavings: settings.totalSavings - transactionToDelete.amount });
+        }
+    };
+
+    const addCategory = async (categoryData: Omit<Category, 'id'>) => {
+        const newCategory = await api.addCategory(categoryData);
+        setCategories(prev => [...prev, newCategory]);
+    };
+
+    const addCard = async (cardData: Omit<CreditCard, 'id' | 'balance' | 'archived'>) => {
+        const newCard = await api.addCard(cardData);
+        setCards(prev => [...prev, newCard]);
+    };
+    
+    const updateCard = async (cardData: CreditCard) => {
+        const updatedCard = await api.updateCard(cardData);
+        setCards(prev => prev.map(c => c.id === updatedCard.id ? updatedCard : c));
+    };
+
+    const archiveCard = async (id: string) => {
+        const cardToArchive = cards.find(c => c.id === id);
+        if (cardToArchive) {
+            const updatedCard = { ...cardToArchive, archived: true };
+            await api.updateCard(updatedCard);
+            setCards(prev => prev.map(c => c.id === id ? updatedCard : c));
+        }
+    };
+
+    const addGoal = async (goalData: Omit<Goal, 'id'>) => {
+        const newGoal = await api.addGoal(goalData);
+        setGoals(prev => [...prev, newGoal]);
+    };
+
+    const updateGoal = async (goalData: Goal) => {
+        const updatedGoal = await api.updateGoal(goalData);
+        setGoals(prev => prev.map(g => g.id === updatedGoal.id ? updatedGoal : g));
+    };
+    
+    const deleteGoal = async (id: string) => {
+        await api.deleteGoal(id);
+        setGoals(prev => prev.filter(g => g.id !== id));
+    };
+
+    const addAsset = async (assetData: Omit<Asset, 'id' | 'lastUpdated'>) => {
+        const newAsset = await api.addAsset(assetData);
+        setAssets(prev => [...prev, newAsset]);
+    };
+
+    const updateAsset = async (assetData: Asset) => {
+        const updatedAsset = await api.updateAsset({ ...assetData, lastUpdated: new Date().toISOString() });
+        setAssets(prev => prev.map(a => a.id === updatedAsset.id ? updatedAsset : a));
+    };
+    
+    const deleteAsset = async (id: string) => {
+        await api.deleteAsset(id);
+        setAssets(prev => prev.filter(a => a.id !== id));
+    };
+
+    const updateSettings = async (newSettings: Partial<AppSettings>) => {
+        const updatedSettings = await api.updateSettings(newSettings);
+        setSettings(updatedSettings);
+        if (newSettings.theme) {
+            applyTheme(newSettings.theme);
+        }
+    };
+
+    const getCardById = useCallback((id: string) => cards.find(c => c.id === id), [cards]);
+
+    return (
+        <AppContext.Provider value={{
+            transactions, categories, cards, goals, assets, settings, loading,
+            addTransaction, updateTransaction, deleteTransaction,
+            addCategory,
+            addCard, updateCard, archiveCard,
+            addGoal, updateGoal, deleteGoal,
+            addAsset, updateAsset, deleteAsset,
+            updateSettings, getCardById
+        }}>
+            {children}
+        </AppContext.Provider>
+    );
+};
+
+export const useAppContext = () => {
+    const context = useContext(AppContext);
+    if (context === undefined) {
+        throw new Error('useAppContext must be used within an AppProvider');
+    }
+    return context;
+};

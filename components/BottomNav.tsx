@@ -1,0 +1,49 @@
+
+import React from 'react';
+import { LayoutIcon, ExpensesIcon, UserIcon } from './Icons';
+
+interface NavItemProps {
+    icon: React.ElementType;
+    label: string;
+    view: string;
+    isActive: boolean;
+    onClick: (view: string) => void;
+}
+
+const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, view, isActive, onClick }) => (
+    <button onClick={() => onClick(view)} className="flex flex-col items-center justify-center w-full space-y-1 pt-2">
+        <Icon className={`w-6 h-6 transition-colors duration-300 ${isActive ? 'text-foreground' : 'text-muted-foreground'}`} />
+        <span className={`text-xs transition-colors duration-300 ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>{label}</span>
+        {isActive && <div className="h-0.5 w-6 bg-foreground rounded-full mt-1"></div>}
+    </button>
+);
+
+interface BottomNavProps {
+    activeView: string;
+    setActiveView: (view: string) => void;
+}
+
+const BottomNav: React.FC<BottomNavProps> = ({ activeView, setActiveView }) => {
+    const navItems = [
+        { icon: LayoutIcon, label: 'Dashboard', view: 'dashboard' },
+        { icon: ExpensesIcon, label: 'Transactions', view: 'transactions' },
+        { icon: UserIcon, label: 'Profile', view: 'profile' },
+    ];
+
+    return (
+        <nav className="fixed bottom-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-sm border-t border-border flex justify-around items-start z-40">
+            {navItems.map((item) => (
+                <NavItem
+                    key={item.view}
+                    icon={item.icon}
+                    label={item.label}
+                    view={item.view}
+                    isActive={activeView === item.view}
+                    onClick={setActiveView}
+                />
+            ))}
+        </nav>
+    );
+};
+
+export default BottomNav;

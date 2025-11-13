@@ -1,0 +1,5 @@
+{
+  "name": "ExpensiTrak",
+  "description": "A Progressive Web App for personal expense tracking with analytics, budget management, and offline capabilities. Features a modern, futuristic fintech-inspired design.",
+  "requestFramePermissions": []
+}
