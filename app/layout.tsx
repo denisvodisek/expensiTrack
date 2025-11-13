@@ -20,7 +20,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: 'ExpensiTrak',
   description: 'Track your expenses and manage your finances',
-  manifest: '/manifest.json',
+  manifest: '/manifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
