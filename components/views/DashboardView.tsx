@@ -11,7 +11,7 @@ const PIE_COLORS = ['#16a34a', '#3b82f6', '#f97316', '#ef4444', '#8b5cf6', '#ec4
 
 
 const DashboardView: React.FC = () => {
-    const { transactions, settings, cards, updateSettings, loading, addTransaction } = useAppContext();
+    const { transactions, settings, cards, updateSettings, loading, addTransaction, categories } = useAppContext();
     const [payingCardId, setPayingCardId] = React.useState<string | null>(null);
     const [paymentAmount, setPaymentAmount] = React.useState('');
 
@@ -56,7 +56,15 @@ const DashboardView: React.FC = () => {
             return acc;
     }, {} as Record<string, number>);
 
-    const pieChartData = Object.entries(categorySpending).map(([name, value]) => ({ name, value }));
+    const pieChartData = Object.entries(categorySpending).map(([name, value], index) => {
+        const category = categories.find(c => c.name === name);
+        return { 
+            name, 
+            value,
+            emoji: category?.emoji || '',
+            color: PIE_COLORS[index % PIE_COLORS.length]
+        };
+    });
     
     const activeCards = cards.filter(c => !c.archived);
 
@@ -147,7 +155,13 @@ const DashboardView: React.FC = () => {
                                 }}
                                 itemStyle={{ fontWeight: 'bold', fontSize: '13px' }}
                                 labelStyle={{ color: 'hsl(var(--muted-foreground))', fontWeight: 'bold', fontSize: '12px', marginBottom: '4px' }}
-                                formatter={(value: number) => currencyFormatter.format(value)}
+                                formatter={(value: number) => {
+                                    const formatted = new Intl.NumberFormat('en-US', {
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 2,
+                                    }).format(value);
+                                    return `$${formatted}`;
+                                }}
                             />
                             <Legend 
                                 wrapperStyle={{fontSize: "12px", paddingTop: "10px"}}
@@ -175,19 +189,46 @@ const DashboardView: React.FC = () => {
                 <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
                     <h2 className="text-base sm:text-lg font-semibold font-display mb-2">Category Breakdown</h2>
                     {pieChartData.length > 0 ? (
-                        <div className="h-48">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} innerRadius={50} fill="#8884d8" paddingAngle={5} stroke="none">
-                                        {pieChartData.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
-                                    </Pie>
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}
-                                        itemStyle={{ color: 'hsl(var(--foreground))' }}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
+                        <>
+                            <div className="h-48">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} innerRadius={50} fill="#8884d8" paddingAngle={5} stroke="none">
+                                            {pieChartData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                                        </Pie>
+                                        <Tooltip
+                                            contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}
+                                            itemStyle={{ color: 'hsl(var(--foreground))' }}
+                                            formatter={(value: number) => {
+                                                const formatted = new Intl.NumberFormat('en-US', {
+                                                    minimumFractionDigits: 0,
+                                                    maximumFractionDigits: 2,
+                                                }).format(value);
+                                                return `$${formatted}`;
+                                            }}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                            <div className="mt-3 space-y-1">
+                                {pieChartData.map((entry, index) => {
+                                    const formatted = new Intl.NumberFormat('en-US', {
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 2,
+                                    }).format(entry.value);
+                                    return (
+                                        <div key={index} className="flex items-center justify-between text-[10px]">
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: entry.color }}></div>
+                                                <span>{entry.emoji}</span>
+                                                <span className="text-muted-foreground">{entry.name}</span>
+                                            </div>
+                                            <span className="font-numbers font-semibold">${formatted}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
                     ) : (
                         <p className="text-center text-muted-foreground h-48 flex items-center justify-center">No expenses this month to show.</p>
                     )}
@@ -269,7 +310,7 @@ const StatCard: React.FC<{title: string; amount: number; color?: string; classNa
             <h3 className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{title}</h3>
             <PrivacyWrapper>
                 <p className={`text-lg sm:text-xl md:text-2xl font-bold mt-1 font-numbers break-words ${color || 'text-foreground'}`}>{formatted.display}</p>
-                <p className={`text-[10px] opacity-70 font-numbers ${color || 'text-foreground'}`}>{formatted.exact}</p>
+                <p className={`text-[8px] opacity-70 font-numbers ${color || 'text-foreground'}`}>{formatted.exact}</p>
             </PrivacyWrapper>
         </div>
     );
