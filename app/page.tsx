@@ -58,9 +58,9 @@ const AppContent: React.FC = () => {
     const memoizedView = useMemo(() => renderView(), [activeView, loading, settings]);
 
     return (
-        <div className="h-screen w-screen bg-background text-foreground flex flex-col hide-scrollbar">
+        <div className="h-screen h-[100dvh] w-screen bg-background text-foreground flex flex-col hide-scrollbar" style={{ height: '100dvh' }}>
             <InstallBanner />
-            <main className="flex-1 overflow-y-auto pb-20 hide-scrollbar">
+            <main className="flex-1 overflow-y-auto pb-20 hide-scrollbar" style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
                {memoizedView}
             </main>
             

@@ -19,24 +19,24 @@ const TransactionListItem: React.FC<{ transaction: Transaction; onEdit: () => vo
     const category = categories.find(c => c.name === transaction.category);
 
     return (
-        <div className="bg-card p-3 rounded-lg flex items-center justify-between gap-2">
-            <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
-                <div className="bg-secondary p-1.5 sm:p-2 rounded-md text-lg sm:text-xl flex-shrink-0">
+        <div className="bg-card p-2.5 rounded-lg flex items-center justify-between gap-2">
+            <div className="flex items-center space-x-2 flex-1 min-w-0">
+                <div className="bg-secondary p-1.5 rounded-md text-base flex-shrink-0">
                     <span>{category?.emoji || '-'}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm sm:text-base truncate">{transaction.category}</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground truncate">{transaction.description || (transaction.type === 'expense' ? paymentDetail : 'Income')}</p>
+                    <p className="font-semibold text-xs truncate">{transaction.category}</p>
+                    <p className="text-xs text-muted-foreground truncate">{transaction.description || (transaction.type === 'expense' ? paymentDetail : 'Income')}</p>
                 </div>
             </div>
-            <div className="text-right flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
-                 <p className={`font-bold text-base sm:text-lg font-numbers whitespace-nowrap ${transaction.type === 'income' ? 'text-green-400' : 'text-foreground'}`}>
+            <div className="text-right flex items-center space-x-2 flex-shrink-0">
+                 <p className={`font-bold text-sm font-numbers whitespace-nowrap ${transaction.type === 'income' ? 'text-green-400' : 'text-foreground'}`}>
                     {transaction.type === 'income' ? '+' : '-'}
                     {currencyFormatter.format(transaction.amount)}
                 </p>
-                <div className="flex items-center space-x-2">
-                   <button onClick={onEdit} className="text-muted-foreground hover:text-blue-400"><EditIcon className="w-4 h-4"/></button>
-                   <button onClick={onDelete} className="text-muted-foreground hover:text-red-400"><DeleteIcon className="w-4 h-4"/></button>
+                <div className="flex items-center space-x-1.5">
+                   <button onClick={onEdit} className="text-muted-foreground hover:text-blue-400"><EditIcon className="w-3.5 h-3.5"/></button>
+                   <button onClick={onDelete} className="text-muted-foreground hover:text-red-400"><DeleteIcon className="w-3.5 h-3.5"/></button>
                 </div>
             </div>
         </div>
@@ -98,10 +98,9 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({ onEditTransaction }
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground font-display">Transactions</h1>
             
             <div className="flex space-x-2 bg-secondary p-1 rounded-md">
-                <FilterButton label="This Week" period="week" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
                 <FilterButton label="This Month" period="month" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
                 <FilterButton label="Last Month" period="last-month" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
-                <FilterButton label="3 Months" period="quarter" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
+                <FilterButton label="Last 3 Months" period="quarter" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
             </div>
 
             <ChartsView transactions={filteredTransactions} />
@@ -136,7 +135,7 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({ onEditTransaction }
 
 const FilterButton: React.FC<{label: string; period: string; activePeriod: string; setPeriod: (p: string) => void}> = 
     ({label, period, activePeriod, setPeriod}) => (
-    <button onClick={() => setPeriod(period)} className={`w-full py-1.5 rounded text-sm font-semibold transition-colors ${activePeriod === period ? 'bg-background shadow' : 'text-muted-foreground'}`}>{label}</button>
+    <button onClick={() => setPeriod(period)} className={`flex-1 py-1.5 px-2 rounded text-xs font-semibold transition-colors ${activePeriod === period ? 'bg-background shadow' : 'text-muted-foreground'}`}>{label}</button>
 );
 
 
