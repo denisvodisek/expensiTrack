@@ -1,18 +1,19 @@
+'use client'
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { AppProvider, useAppContext } from './contexts/AppContext';
-import DashboardView from './components/views/DashboardView';
-import TransactionsView from './components/views/ExpensesView';
-import ProfileView from './components/views/ProfileView';
-import BottomNav from './components/BottomNav';
-import { AddIcon } from './components/Icons';
-import AddTransactionModal from './components/AddExpenseModal';
-import OnboardingModal from './components/OnboardingModal';
-import InstallBanner from './components/InstallBanner';
-import { ServiceWorkerManager } from './components/ServiceWorkerManager';
-import type { Transaction } from './types';
-import { useAuth } from './contexts/AuthContext';
-import LoginView from './components/views/LoginView';
+import { AppProvider, useAppContext } from '@/contexts/AppContext';
+import DashboardView from '@/components/views/DashboardView';
+import TransactionsView from '@/components/views/ExpensesView';
+import ProfileView from '@/components/views/ProfileView';
+import BottomNav from '@/components/BottomNav';
+import { AddIcon } from '@/components/Icons';
+import AddTransactionModal from '@/components/AddExpenseModal';
+import OnboardingModal from '@/components/OnboardingModal';
+import InstallBanner from '@/components/InstallBanner';
+import { ServiceWorkerManager } from '@/components/ServiceWorkerManager';
+import type { Transaction } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import LoginView from '@/components/views/LoginView';
 
 const AppContent: React.FC = () => {
     const { settings, loading } = useAppContext();
@@ -107,4 +108,7 @@ const App: React.FC = () => {
     );
 };
 
-export default App;
+export default function Home() {
+    return <App />;
+}
+

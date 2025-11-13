@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { useAppContext } from '../../contexts/AppContext';
-import { useAuth } from '../../contexts/AuthContext';
-import { DeleteIcon, CheckCircleIcon, SunIcon, MoonIcon, PrivacyOnIcon, PrivacyOffIcon } from '../Icons';
-import PrivacyWrapper from '../PrivacyWrapper';
-import { downloadDataAsJson, importDataFromFile } from '../../services/api';
+import { useAppContext } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { DeleteIcon, CheckCircleIcon, SunIcon, MoonIcon, PrivacyOnIcon, PrivacyOffIcon } from '@/components/Icons';
+import PrivacyWrapper from '@/components/PrivacyWrapper';
+import { downloadDataAsJson, importDataFromFile } from '@/services/api';
 
 const currencyFormatter = new Intl.NumberFormat('en-HK', { style: 'currency', currency: 'HKD' });
 

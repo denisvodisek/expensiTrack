@@ -1,7 +1,8 @@
+'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import type { Transaction, Category, CreditCard, Goal, Asset, AppSettings } from '../types';
-import * as api from '../services/api';
+import type { Transaction, Category, CreditCard, Goal, Asset, AppSettings } from '@/types';
+import * as api from '@/services/api';
 
 interface AppContextType {
     transactions: Transaction[];

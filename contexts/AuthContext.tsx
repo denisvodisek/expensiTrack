@@ -1,8 +1,9 @@
+'use client'
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
-const USERNAME = import.meta.env.VITE_USERNAME || 'admin';
-const PASSWORD = import.meta.env.VITE_PASSWORD || 'password';
+const USERNAME = process.env.NEXT_PUBLIC_USERNAME || 'admin';
+const PASSWORD = process.env.NEXT_PUBLIC_PASSWORD || 'password';
 
 interface AuthContextType {
     isAuthenticated: boolean;

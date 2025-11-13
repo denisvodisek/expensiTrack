@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useAppContext } from '../contexts/AppContext';
+import { useAppContext } from '@/contexts/AppContext';
 
 interface OnboardingModalProps {
     onClose: () => void;

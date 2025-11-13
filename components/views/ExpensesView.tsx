@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { useAppContext } from '../../contexts/AppContext';
-import type { Transaction } from '../../types';
-import { EditIcon, DeleteIcon } from '../Icons';
+import { useAppContext } from '@/contexts/AppContext';
+import type { Transaction } from '@/types';
+import { EditIcon, DeleteIcon } from '@/components/Icons';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
-import PrivacyWrapper from '../PrivacyWrapper';
+import PrivacyWrapper from '@/components/PrivacyWrapper';
 
 const currencyFormatter = new Intl.NumberFormat('en-HK', { style: 'currency', currency: 'HKD' });
 const PIE_COLORS = ['#16a34a', '#3b82f6', '#f97316', '#ef4444', '#8b5cf6', '#ec4899', '#fde047', '#22d3ee'];

@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { useAppContext } from '../../contexts/AppContext';
+import { useAppContext } from '@/contexts/AppContext';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
-import PrivacyWrapper from '../PrivacyWrapper';
-import { PrivacyOnIcon, PrivacyOffIcon, CreditCardIcon } from '../Icons';
+import PrivacyWrapper from '@/components/PrivacyWrapper';
+import { PrivacyOnIcon, PrivacyOffIcon, CreditCardIcon } from '@/components/Icons';
 
 const currencyFormatter = new Intl.NumberFormat('en-HK', { style: 'currency', currency: 'HKD' });
 const PIE_COLORS = ['#16a34a', '#3b82f6', '#f97316', '#ef4444', '#8b5cf6', '#ec4899', '#fde047', '#22d3ee'];

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useAppContext } from '../contexts/AppContext';
+import { useAppContext } from '@/contexts/AppContext';
 
 interface PrivacyWrapperProps {
     children: React.ReactNode;
@@ -9,7 +9,7 @@ interface PrivacyWrapperProps {
 const PrivacyWrapper: React.FC<PrivacyWrapperProps> = ({ children }) => {
     const { settings } = useAppContext();
 
-    if (settings.privacyMode) {
+    if (settings?.privacyMode) {
         return <span className="blur select-none">HK$ ****.**</span>;
     }
 

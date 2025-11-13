@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { useAppContext } from '../contexts/AppContext';
-import { CloseIcon, CreditCardIcon } from './Icons';
-import type { Transaction } from '../types';
+import { useAppContext } from '@/contexts/AppContext';
+import { CloseIcon, CreditCardIcon } from '@/components/Icons';
+import type { Transaction } from '@/types';
 
 interface AddTransactionModalProps {
     isOpen: boolean;
