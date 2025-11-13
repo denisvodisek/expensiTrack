@@ -22,14 +22,22 @@
         {
           "key": "Content-Type",
           "value": "application/manifest+json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
         }
       ]
     }
   ],
   "rewrites": [
     {
-      "source": "/(.*\\.(json|js|ico|png|svg|jpg|jpeg|gif|webp|woff|woff2|ttf|eot))",
-      "destination": "/$1"
+      "source": "/manifest.json",
+      "destination": "/manifest.json"
+    },
+    {
+      "source": "/sw.js",
+      "destination": "/sw.js"
     },
     {
       "source": "/(.*)",
