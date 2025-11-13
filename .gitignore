@@ -10,7 +10,7 @@ coverage/
 dist/
 build/
 
-# Next.js
+# Next.js build output
 .next/
 out/
 
