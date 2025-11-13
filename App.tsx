@@ -8,6 +8,7 @@ import BottomNav from './components/BottomNav';
 import { AddIcon } from './components/Icons';
 import AddTransactionModal from './components/AddExpenseModal';
 import OnboardingModal from './components/OnboardingModal';
+import InstallBanner from './components/InstallBanner';
 import type { Transaction } from './types';
 import { useAuth } from './contexts/AuthContext';
 import LoginView from './components/views/LoginView';
@@ -56,6 +57,7 @@ const AppContent: React.FC = () => {
 
     return (
         <div className="h-screen w-screen bg-background text-foreground flex flex-col hide-scrollbar">
+            <InstallBanner />
             <main className="flex-1 overflow-y-auto pb-20 hide-scrollbar">
                {memoizedView}
             </main>

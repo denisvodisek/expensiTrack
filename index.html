@@ -147,18 +147,16 @@
         }
       })();
 
-      // PWA Install Prompt Handler
-      let deferredPrompt;
+      // PWA Install Prompt Handler - Store for React component
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
-        deferredPrompt = e;
+        (window as any).deferredPrompt = e;
         console.log('PWA install prompt available');
-        // You can show a custom install button here if needed
       });
 
       window.addEventListener('appinstalled', () => {
         console.log('PWA was installed');
-        deferredPrompt = null;
+        (window as any).deferredPrompt = null;
       });
     </script>
   <script type="importmap">
