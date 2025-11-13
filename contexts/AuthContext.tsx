@@ -1,6 +1,8 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { USERNAME, PASSWORD } from '../config';
+
+const USERNAME = import.meta.env.VITE_USERNAME || 'admin';
+const PASSWORD = import.meta.env.VITE_PASSWORD || 'password';
 
 interface AuthContextType {
     isAuthenticated: boolean;
