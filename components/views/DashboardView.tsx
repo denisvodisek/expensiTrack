@@ -49,12 +49,20 @@ const DashboardView: React.FC = () => {
             return acc;
         }, {} as Record<number, { income: number, expense: number }>);
 
-    const barChartData = Array.from({length: new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()}, (_, i) => i + 1)
-        .map(day => ({
-            name: String(day),
-            Income: dailyFlowData[day]?.income || 0,
-            Expense: dailyFlowData[day]?.expense || 0,
-        }));
+    // Only show days that have transactions
+    const barChartData = Object.keys(dailyFlowData)
+        .map(dayStr => {
+            const day = parseInt(dayStr);
+            const date = new Date(now.getFullYear(), now.getMonth(), day);
+            return {
+                name: date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+                day: day,
+                date: date,
+                Income: dailyFlowData[day].income || 0,
+                Expense: dailyFlowData[day].expense || 0,
+            };
+        })
+        .sort((a, b) => a.day - b.day);
 
     return (
         <div className="p-4 space-y-6">
@@ -75,24 +83,27 @@ const DashboardView: React.FC = () => {
             </div>
 
              <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
-                <h2 className="text-base sm:text-lg font-semibold font-display mb-2">Daily Flow (This Month)</h2>
-                <div className="h-48">
+                <h2 className="text-base sm:text-lg font-semibold font-display mb-4">Daily Flow (This Month)</h2>
+                {barChartData.length === 0 ? (
+                    <div className="h-64 sm:h-80 flex items-center justify-center text-muted-foreground">
+                        <p className="text-center">No transactions this month</p>
+                    </div>
+                ) : (
+                <div className="h-64 sm:h-80">
                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={barChartData} margin={{ top: 5, right: 5, left: 0, bottom: 60 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <BarChart data={barChartData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                             <XAxis 
                                 dataKey="name" 
-                                tick={{ fill: 'hsl(var(--muted-foreground))' }} 
-                                fontSize={10}
+                                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} 
                                 angle={-45}
                                 textAnchor="end"
-                                height={60}
-                                interval={0}
+                                height={50}
+                                interval={barChartData.length > 10 ? Math.floor(barChartData.length / 6) : 0}
                             />
                             <YAxis 
-                                tick={{ fill: 'hsl(var(--muted-foreground))' }} 
-                                fontSize={10}
-                                width={40}
+                                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} 
+                                width={45}
                                 tickFormatter={(value) => {
                                     if (value >= 1000) {
                                         return `$${(value / 1000).toFixed(1)}k`;
@@ -101,17 +112,37 @@ const DashboardView: React.FC = () => {
                                 }}
                             />
                             <Tooltip
-                                cursor={{fill: 'hsl(var(--secondary))'}}
-                                contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}
-                                itemStyle={{ fontWeight: 'bold' }}
-                                labelStyle={{ color: 'hsl(var(--muted-foreground))', fontWeight: 'bold' }}
+                                cursor={{fill: 'hsl(var(--secondary))', opacity: 0.3}}
+                                contentStyle={{ 
+                                    backgroundColor: 'hsl(var(--card))', 
+                                    border: '1px solid hsl(var(--border))', 
+                                    borderRadius: '8px',
+                                    padding: '8px 12px'
+                                }}
+                                itemStyle={{ fontWeight: 'bold', fontSize: '13px' }}
+                                labelStyle={{ color: 'hsl(var(--muted-foreground))', fontWeight: 'bold', fontSize: '12px', marginBottom: '4px' }}
+                                formatter={(value: number) => currencyFormatter.format(value)}
                             />
-                            <Legend wrapperStyle={{fontSize: "12px"}}/>
-                            <Bar dataKey="Income" fill="#16a34a" radius={[4, 4, 0, 0]} />
-                            <Bar dataKey="Expense" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                            <Legend 
+                                wrapperStyle={{fontSize: "12px", paddingTop: "10px"}}
+                                iconType="square"
+                            />
+                            <Bar 
+                                dataKey="Income" 
+                                fill="#16a34a" 
+                                radius={[6, 6, 0, 0]} 
+                                name="Income"
+                            />
+                            <Bar 
+                                dataKey="Expense" 
+                                fill="#ef4444" 
+                                radius={[6, 6, 0, 0]} 
+                                name="Expense"
+                            />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
+                )}
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
