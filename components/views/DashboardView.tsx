@@ -11,7 +11,7 @@ const PIE_COLORS = ['#16a34a', '#3b82f6', '#f97316', '#ef4444', '#8b5cf6', '#ec4
 
 
 const DashboardView: React.FC = () => {
-    const { transactions, settings, cards, updateSettings, loading, addTransaction, categories } = useAppContext();
+    const { transactions, settings, cards, updateSettings, loading, addTransaction, categories, goals } = useAppContext();
     const [payingCardId, setPayingCardId] = React.useState<string | null>(null);
     const [paymentAmount, setPaymentAmount] = React.useState('');
 
@@ -43,11 +43,50 @@ const DashboardView: React.FC = () => {
     // --- Data processing ---
     const now = new Date();
     const currentMonthTransactions = transactions.filter(t => new Date(t.date).getMonth() === now.getMonth() && new Date(t.date).getFullYear() === now.getFullYear());
-    
+
     const monthlyIncome = currentMonthTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const monthlyExpense = currentMonthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
     // Note: credit_card_payment is excluded from income/expense calculations
     const netFlow = monthlyIncome - monthlyExpense;
+
+    // Calculate monthly savings progress
+    const monthlySavingsProgress = useMemo(() => {
+        if (!settings || goals.length === 0) return null;
+
+        // Find active goals (not achieved, not overdue)
+        const activeGoals = goals.filter(goal => {
+            const remainingAmount = Math.max(0, goal.targetAmount - settings.totalSavings);
+            const daysLeft = (new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24);
+            return remainingAmount > 0 && daysLeft > 0;
+        });
+
+        if (activeGoals.length === 0) return null;
+
+        // Calculate total monthly savings needed across all goals
+        const totalMonthlyNeeded = activeGoals.reduce((total, goal) => {
+            const remainingAmount = Math.max(0, goal.targetAmount - settings.totalSavings);
+            const daysLeft = (new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24);
+            const monthsLeft = Math.max(1, daysLeft / 30.44);
+
+            // Cap at 10 years for reasonable calculations
+            const cappedMonths = Math.min(monthsLeft, 365 * 10 / 30.44);
+            return total + (remainingAmount / cappedMonths);
+        }, 0);
+
+        // Calculate what they've saved so far this month (income - expenses)
+        const monthlySavings = monthlyIncome - monthlyExpense;
+
+        const progress = (monthlySavings / totalMonthlyNeeded) * 100;
+        const remaining = Math.max(0, totalMonthlyNeeded - monthlySavings);
+
+        return {
+            target: totalMonthlyNeeded,
+            current: monthlySavings,
+            remaining: remaining,
+            progress: Math.min(100, progress),
+            isOnTrack: monthlySavings >= totalMonthlyNeeded * 0.8 // 80% of target
+        };
+    }, [goals, settings, monthlyIncome, monthlyExpense]);
 
     const categorySpending = currentMonthTransactions
         .filter(t => t.type === 'expense') // Exclude credit_card_payment from spending calculations
@@ -115,6 +154,43 @@ const DashboardView: React.FC = () => {
                 <StatCard title="Expense" amount={monthlyExpense} color="text-red-500" />
                 <StatCard title="Net Flow" amount={netFlow} color={netFlow >= 0 ? 'text-green-500' : 'text-red-500'} className="col-span-2 md:col-span-1" />
             </div>
+
+            {/* Monthly Savings Progress */}
+            {monthlySavingsProgress && (
+                <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-sm sm:text-base font-semibold font-display">Monthly Savings Goal</h3>
+                        <div className="text-right">
+                            <div className="text-sm font-bold font-numbers">{formatCurrency(monthlySavingsProgress.current).display}</div>
+                            <div className="text-xs text-muted-foreground">of {formatCurrency(monthlySavingsProgress.target).display}</div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="w-full bg-secondary rounded-full h-3">
+                            <div
+                                className={`h-3 rounded-full transition-all duration-300 ${monthlySavingsProgress.isOnTrack ? 'bg-green-500' : 'bg-yellow-500'}`}
+                                style={{ width: `${Math.max(5, monthlySavingsProgress.progress)}%` }}
+                            ></div>
+                        </div>
+
+                        {monthlySavingsProgress.remaining > 0 ? (
+                            <div className="flex items-center justify-between text-xs">
+                                <span className="text-muted-foreground">
+                                    {monthlySavingsProgress.isOnTrack ? 'Great progress!' : 'Need to save more this month'}
+                                </span>
+                                <span className="font-semibold">
+                                    {formatCurrency(monthlySavingsProgress.remaining).display} remaining
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="text-xs text-green-600 font-semibold text-center">
+                                🎉 Monthly savings goal achieved!
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
              <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
                 <h2 className="text-base sm:text-lg font-semibold font-display mb-4">Daily Flow (This Month)</h2>

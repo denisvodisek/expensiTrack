@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
 import { CloseIcon, CreditCardIcon } from '@/components/Icons';
 import type { Transaction } from '@/types';
+import Confetti from 'react-confetti';
 
 interface AddTransactionModalProps {
     isOpen: boolean;
@@ -94,8 +95,14 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
             await updateTransaction({ ...transactionData, id: transactionToEdit.id });
         } else {
             await addTransaction(transactionData);
+
+            // Trigger confetti for income transactions
+            if (transactionData.type === 'income') {
+                setShowConfetti(true);
+                setTimeout(() => setShowConfetti(false), 3000); // Show for 3 seconds
+            }
         }
-        
+
         onClose();
     };
 
@@ -186,6 +193,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
                 </form>
             </div>
         </div>
+        </>
     );
 };
 
