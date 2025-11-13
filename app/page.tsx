@@ -58,15 +58,15 @@ const AppContent: React.FC = () => {
     const memoizedView = useMemo(() => renderView(), [activeView, loading, settings]);
 
     return (
-        <div className="h-screen h-[100dvh] w-screen bg-background text-foreground flex flex-col hide-scrollbar" style={{ height: '100dvh' }}>
+        <div className="fixed inset-0 w-full h-full bg-background text-foreground flex flex-col hide-scrollbar" style={{ height: '100dvh', maxHeight: '100dvh' }}>
             <InstallBanner />
-            <main className="flex-1 overflow-y-auto pb-20 hide-scrollbar" style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
+            <main className="flex-1 overflow-y-auto hide-scrollbar" style={{ paddingBottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))' }}>
                {memoizedView}
             </main>
             
             {!loading && (
                 <>
-                    <div className="fixed bottom-20 right-4 z-50">
+                    <div className="fixed right-4 z-50" style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px) + 1rem)' }}>
                         <button
                             onClick={() => setAddTransactionModalOpen(true)}
                             className="bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:scale-110 transition-transform duration-300"

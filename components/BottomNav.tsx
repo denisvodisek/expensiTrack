@@ -11,10 +11,10 @@ interface NavItemProps {
 }
 
 const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, view, isActive, onClick }) => (
-    <button onClick={() => onClick(view)} className="flex flex-col items-center justify-center w-full space-y-1 pt-2">
+    <button onClick={() => onClick(view)} className="flex flex-col items-center justify-center w-full h-full space-y-1 py-1">
         <Icon className={`w-6 h-6 transition-colors duration-300 ${isActive ? 'text-foreground' : 'text-muted-foreground'}`} />
         <span className={`text-xs transition-colors duration-300 ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>{label}</span>
-        {isActive && <div className="h-0.5 w-6 bg-foreground rounded-full mt-1"></div>}
+        {isActive && <div className="h-0.5 w-6 bg-foreground rounded-full mt-0.5"></div>}
     </button>
 );
 
@@ -31,7 +31,11 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeView, setActiveView }) => {
     ];
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-border flex justify-around items-start z-40" style={{ height: 'calc(4rem + env(safe-area-inset-bottom, 0px))', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        <nav className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-border flex justify-around items-center z-40" style={{ 
+            height: 'calc(4rem + env(safe-area-inset-bottom, 0px))', 
+            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+            minHeight: '4rem'
+        }}>
             {navItems.map((item) => (
                 <NavItem
                     key={item.view}

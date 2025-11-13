@@ -22,10 +22,11 @@ const DashboardView: React.FC = () => {
     
     const monthlyIncome = currentMonthTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const monthlyExpense = currentMonthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    // Note: credit_card_payment is excluded from income/expense calculations
     const netFlow = monthlyIncome - monthlyExpense;
 
     const categorySpending = currentMonthTransactions
-        .filter(t => t.type === 'expense')
+        .filter(t => t.type === 'expense') // Exclude credit_card_payment from spending calculations
         .reduce((acc, t) => {
             acc[t.category] = (acc[t.category] || 0) + t.amount;
             return acc;
@@ -41,11 +42,12 @@ const DashboardView: React.FC = () => {
             if (!acc[day]) {
                 acc[day] = { income: 0, expense: 0 };
             }
-            if (t.type === 'income') {
-                acc[day].income += t.amount;
-            } else {
-                acc[day].expense += t.amount;
-            }
+                if (t.type === 'income') {
+                    acc[day].income += t.amount;
+                } else if (t.type === 'expense') {
+                    // Exclude credit_card_payment from expense calculations
+                    acc[day].expense += t.amount;
+                }
             return acc;
         }, {} as Record<number, { income: number, expense: number }>);
 

@@ -26,12 +26,12 @@ const TransactionListItem: React.FC<{ transaction: Transaction; onEdit: () => vo
                 </div>
                 <div className="flex-1 min-w-0">
                     <p className="font-semibold text-xs truncate">{transaction.category}</p>
-                    <p className="text-xs text-muted-foreground truncate">{transaction.description || (transaction.type === 'expense' ? paymentDetail : 'Income')}</p>
+                    <p className="text-xs text-muted-foreground truncate">{transaction.description || (transaction.type === 'expense' ? paymentDetail : transaction.type === 'credit_card_payment' ? 'Credit Card Payment' : 'Income')}</p>
                 </div>
             </div>
             <div className="text-right flex items-center space-x-2 flex-shrink-0">
-                 <p className={`font-bold text-sm font-numbers whitespace-nowrap ${transaction.type === 'income' ? 'text-green-400' : 'text-foreground'}`}>
-                    {transaction.type === 'income' ? '+' : '-'}
+                 <p className={`font-bold text-sm font-numbers whitespace-nowrap ${transaction.type === 'income' ? 'text-green-400' : transaction.type === 'credit_card_payment' ? 'text-blue-400' : 'text-foreground'}`}>
+                    {transaction.type === 'income' ? '+' : transaction.type === 'credit_card_payment' ? '↻' : '-'}
                     {currencyFormatter.format(transaction.amount)}
                 </p>
                 <div className="flex items-center space-x-1.5">
@@ -143,10 +143,12 @@ const ChartsView: React.FC<{transactions: Transaction[]}> = ({ transactions }) =
     const { totalIncome, totalExpense, netFlow } = useMemo(() => {
         const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
         const expense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+        // Note: credit_card_payment is excluded from income/expense calculations
         return { totalIncome: income, totalExpense: expense, netFlow: income - expense };
     }, [transactions]);
     
     const categorySpending = useMemo(() => transactions.filter(t => t.type === 'expense').reduce((acc, t) => {
+        // Exclude credit_card_payment from category spending
         acc[t.category] = (acc[t.category] || 0) + t.amount;
         return acc;
     }, {} as Record<string, number>), [transactions]);
@@ -160,7 +162,8 @@ const ChartsView: React.FC<{transactions: Transaction[]}> = ({ transactions }) =
                 acc[date] = { income: 0, expense: 0 };
             }
             if (t.type === 'income') acc[date].income += t.amount;
-            else acc[date].expense += t.amount;
+            else if (t.type === 'expense') acc[date].expense += t.amount;
+            // credit_card_payment is excluded from income/expense calculations
             return acc;
         }, {} as Record<string, {income: number; expense: number}>);
 

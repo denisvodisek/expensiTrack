@@ -84,10 +84,13 @@ const NetWorthSection: React.FC = () => {
                     <button onClick={() => setShowAddAssetForm(!showAddAssetForm)} className="text-sm font-semibold text-primary">{showAddAssetForm ? 'Cancel' : '+ Add Asset'}</button>
                 </div>
                 {showAddAssetForm && (
-                     <form onSubmit={handleAddAsset} className="bg-card p-2 rounded-lg flex gap-2 border border-border">
-                        <input type="text" placeholder="Asset Name" value={assetName} onChange={e => setAssetName(e.target.value)} required className="flex-1 bg-input p-2 rounded-md text-sm"/>
-                        <input type="number" placeholder="Value" value={assetValue} onChange={e => setAssetValue(e.target.value)} required className="w-24 sm:w-28 bg-input p-2 rounded-md text-xs sm:text-sm font-numbers"/>
-                        <button type="submit" className="bg-primary text-primary-foreground font-bold px-3 rounded-md text-sm">Add</button>
+                     <form onSubmit={handleAddAsset} className="bg-card p-2 sm:p-3 rounded-lg space-y-2 border border-border">
+                        <input type="text" placeholder="Asset Name" value={assetName} onChange={e => setAssetName(e.target.value)} required className="w-full bg-input p-2 rounded-md text-xs sm:text-sm"/>
+                        <div className="flex gap-2">
+                            <input type="number" placeholder="Value" value={assetValue} onChange={e => setAssetValue(e.target.value)} required className="flex-1 bg-input p-2 rounded-md text-xs sm:text-sm font-numbers min-w-0"/>
+                            <button type="submit" className="bg-primary text-primary-foreground font-bold px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm whitespace-nowrap flex-shrink-0">Add</button>
+                            <button type="button" onClick={() => { setShowAddAssetForm(false); setAssetName(''); setAssetValue(''); }} className="bg-secondary text-foreground px-3 py-2 rounded-md text-xs sm:text-sm whitespace-nowrap flex-shrink-0">Cancel</button>
+                        </div>
                     </form>
                 )}
                 {assets.map(asset => (
@@ -239,10 +242,12 @@ const GoalsSection: React.FC = () => {
 
 // Cards Section
 const CardsSection: React.FC = () => {
-    const { cards, addCard, archiveCard } = useAppContext();
+    const { cards, addCard, archiveCard, addTransaction, settings } = useAppContext();
     const [showAddForm, setShowAddForm] = useState(false);
     const [name, setName] = useState('');
     const [limit, setLimit] = useState('');
+    const [payingCardId, setPayingCardId] = useState<string | null>(null);
+    const [paymentAmount, setPaymentAmount] = useState('');
     const activeCards = cards.filter(c => !c.archived);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -253,25 +258,49 @@ const CardsSection: React.FC = () => {
         }
     };
 
+    const handlePayCard = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (payingCardId && paymentAmount && settings) {
+            const amount = parseFloat(paymentAmount);
+            const card = cards.find(c => c.id === payingCardId);
+            if (card && amount > 0 && amount <= card.balance && amount <= settings.totalSavings) {
+                await addTransaction({
+                    type: 'credit_card_payment',
+                    amount,
+                    category: 'Credit Card Payment',
+                    description: `Payment for ${card.name}`,
+                    paymentMethod: 'Bank',
+                    cardId: payingCardId,
+                    date: new Date().toISOString().split('T')[0],
+                });
+                setPayingCardId(null);
+                setPaymentAmount('');
+            }
+        }
+    };
+
     return (
         <section className="space-y-4">
              <div className="flex justify-between items-center">
                  <h2 className="text-xl font-semibold font-display">Credit Cards</h2>
-                 <button onClick={() => setShowAddForm(!showAddForm)} className="text-sm font-semibold text-primary">{showAddForm ? 'Cancel' : '+ New Card'}</button>
+                 <button onClick={() => setShowAddForm(!showAddForm)} className="text-xs sm:text-sm font-semibold text-primary whitespace-nowrap">{showAddForm ? 'Cancel' : '+ New Card'}</button>
             </div>
             {showAddForm && (
-                <form onSubmit={handleSubmit} className="bg-card border border-border p-4 rounded-lg space-y-3">
-                    <input type="text" placeholder="Card Name (e.g., Visa Gold)" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-input p-2 rounded-md"/>
-                    <input type="number" placeholder="Credit Limit (HKD)" value={limit} onChange={e => setLimit(e.target.value)} required className="w-full bg-input p-2 rounded-md font-numbers text-sm sm:text-base"/>
-                    <button type="submit" className="w-full bg-primary text-primary-foreground font-bold py-2 rounded-md text-sm">Add Card</button>
+                <form onSubmit={handleSubmit} className="bg-card border border-border p-3 sm:p-4 rounded-lg space-y-2">
+                    <input type="text" placeholder="Card Name" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-input p-2 rounded-md text-sm"/>
+                    <div className="flex gap-2">
+                        <input type="number" placeholder="Limit (HKD)" value={limit} onChange={e => setLimit(e.target.value)} required className="flex-1 bg-input p-2 rounded-md font-numbers text-xs sm:text-sm min-w-0"/>
+                        <button type="submit" className="bg-primary text-primary-foreground font-bold px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm whitespace-nowrap flex-shrink-0">Add</button>
+                        <button type="button" onClick={() => { setShowAddForm(false); setName(''); setLimit(''); }} className="bg-secondary text-foreground px-3 py-2 rounded-md text-xs sm:text-sm whitespace-nowrap flex-shrink-0">Cancel</button>
+                    </div>
                 </form>
             )}
              {activeCards.map(card => {
                     const utilization = card.limit > 0 ? (card.balance / card.limit) * 100 : 0;
                     return (
-                        <div key={card.id} className="bg-card border border-border p-4 rounded-lg">
+                        <div key={card.id} className="bg-card border border-border p-3 sm:p-4 rounded-lg space-y-2">
                             <div className="flex justify-between items-start">
-                                <h3 className="font-bold">{card.name}</h3>
+                                <h3 className="font-bold text-sm sm:text-base">{card.name}</h3>
                                 <button onClick={() => archiveCard(card.id)} className="text-xs text-destructive">Archive</button>
                             </div>
                              <div className="w-full bg-secondary rounded-full h-2 my-2">
@@ -281,6 +310,34 @@ const CardsSection: React.FC = () => {
                                 <span className="font-numbers">Bal: <PrivacyWrapper>{currencyFormatter.format(card.balance)}</PrivacyWrapper></span>
                                 <span className="font-numbers">Limit: <PrivacyWrapper>{currencyFormatter.format(card.limit)}</PrivacyWrapper></span>
                             </div>
+                            {card.balance > 0 && (
+                                <div className="pt-2 border-t border-border">
+                                    {payingCardId === card.id ? (
+                                        <form onSubmit={handlePayCard} className="flex gap-2">
+                                            <input 
+                                                type="number" 
+                                                placeholder="Amount" 
+                                                value={paymentAmount} 
+                                                onChange={e => setPaymentAmount(e.target.value)} 
+                                                required 
+                                                min="0.01"
+                                                max={Math.min(card.balance, settings?.totalSavings || 0)}
+                                                step="0.01"
+                                                className="flex-1 bg-input p-2 rounded-md font-numbers text-xs sm:text-sm"
+                                            />
+                                            <button type="submit" className="bg-green-600 text-white font-bold px-3 py-2 rounded-md text-xs sm:text-sm whitespace-nowrap">Pay</button>
+                                            <button type="button" onClick={() => { setPayingCardId(null); setPaymentAmount(''); }} className="bg-secondary text-foreground px-3 py-2 rounded-md text-xs sm:text-sm">Cancel</button>
+                                        </form>
+                                    ) : (
+                                        <button 
+                                            onClick={() => setPayingCardId(card.id)} 
+                                            className="w-full bg-green-600 text-white font-bold py-2 rounded-md text-xs sm:text-sm"
+                                        >
+                                            Pay Credit Card
+                                        </button>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     );
                 })}

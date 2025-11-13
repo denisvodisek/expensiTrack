@@ -44,6 +44,11 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
 
     useEffect(() => {
         if (transactionToEdit) {
+            // credit_card_payment transactions can't be edited through this modal
+            if (transactionToEdit.type === 'credit_card_payment') {
+                resetForm();
+                return;
+            }
             setType(transactionToEdit.type);
             setAmount(String(transactionToEdit.amount));
             setSelectedCategory(transactionToEdit.category);
@@ -128,10 +133,15 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
                             <button type="button" onClick={() => setShowNewCategory(true)} className="px-3 py-1.5 rounded-md text-sm font-medium bg-secondary text-muted-foreground">+</button>
                         </div>
                         {showNewCategory && (
-                            <div className="flex gap-2 mt-2">
-                                <input type="text" value={newCategoryEmoji} onChange={(e) => setNewCategoryEmoji(e.target.value)} placeholder="️️️emoji" className="w-14 bg-input border border-border rounded-md px-2 py-1.5 text-foreground text-center"/>
-                                <input type="text" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} placeholder="New category" className="flex-grow bg-input border border-border rounded-md px-3 py-1.5 text-foreground"/>
-                                <button type="button" onClick={handleCategoryAdd} className="bg-primary text-primary-foreground px-4 py-1.5 rounded-md text-sm">Add</button>
+                            <div className="mt-2 space-y-2">
+                                <div className="flex gap-2">
+                                    <input type="text" value={newCategoryEmoji} onChange={(e) => setNewCategoryEmoji(e.target.value)} placeholder="️️️emoji" maxLength={2} className="w-16 bg-input border border-border rounded-md px-2 py-1.5 text-foreground text-center text-sm flex-shrink-0"/>
+                                    <input type="text" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} placeholder="New category" className="flex-1 bg-input border border-border rounded-md px-3 py-1.5 text-foreground text-sm min-w-0"/>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button type="button" onClick={handleCategoryAdd} className="flex-1 bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-xs sm:text-sm whitespace-nowrap">Add</button>
+                                    <button type="button" onClick={() => { setShowNewCategory(false); setNewCategoryName(''); setNewCategoryEmoji(''); }} className="flex-1 bg-secondary text-foreground px-3 py-1.5 rounded-md text-xs sm:text-sm whitespace-nowrap">Cancel</button>
+                                </div>
                             </div>
                         )}
                     </div>

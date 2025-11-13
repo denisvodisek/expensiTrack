@@ -82,9 +82,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setTransactions(prev => [...prev, newTransaction]);
         
         if (transactionData.type === 'expense' && transactionData.cardId) {
+            // Credit card expense: increase card balance
             const card = cards.find(c => c.id === transactionData.cardId);
             if (card) {
                 const updatedCard = { ...card, balance: card.balance + transactionData.amount };
+                await api.updateCard(updatedCard);
+                setCards(prev => prev.map(c => c.id === updatedCard.id ? updatedCard : c));
+            }
+        } else if (transactionData.type === 'credit_card_payment' && transactionData.cardId) {
+            // Credit card payment: reduce card balance only (does NOT affect savings - expense was already counted)
+            const card = cards.find(c => c.id === transactionData.cardId);
+            if (card) {
+                const updatedCard = { ...card, balance: Math.max(0, card.balance - transactionData.amount) };
                 await api.updateCard(updatedCard);
                 setCards(prev => prev.map(c => c.id === updatedCard.id ? updatedCard : c));
             }
@@ -111,9 +120,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         await api.deleteTransaction(id);
         setTransactions(prev => prev.filter(e => e.id !== id));
         if (transactionToDelete.type === 'expense' && transactionToDelete.cardId) {
+            // Revert credit card expense: decrease card balance
             const card = cards.find(c => c.id === transactionToDelete.cardId);
             if (card) {
-                const updatedCard = { ...card, balance: card.balance - transactionToDelete.amount };
+                const updatedCard = { ...card, balance: Math.max(0, card.balance - transactionToDelete.amount) };
+                await api.updateCard(updatedCard);
+                setCards(prev => prev.map(c => c.id === updatedCard.id ? updatedCard : c));
+            }
+        } else if (transactionToDelete.type === 'credit_card_payment' && transactionToDelete.cardId) {
+            // Revert credit card payment: increase card balance only (does NOT affect savings)
+            const card = cards.find(c => c.id === transactionToDelete.cardId);
+            if (card) {
+                const updatedCard = { ...card, balance: card.balance + transactionToDelete.amount };
                 await api.updateCard(updatedCard);
                 setCards(prev => prev.map(c => c.id === updatedCard.id ? updatedCard : c));
             }
