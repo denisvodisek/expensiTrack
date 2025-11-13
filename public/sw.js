@@ -1,5 +1,5 @@
 // Version-based cache name - update this with each deployment
-const CACHE_VERSION = 'v1.0.3';
+const CACHE_VERSION = 'v1.0.4';
 const CACHE_NAME = `expensitrak-${CACHE_VERSION}`;
 
 const urlsToCache = [
@@ -24,7 +24,15 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Opened cache:', CACHE_NAME);
-        return cache.addAll(urlsToCache);
+        return cache.addAll(urlsToCache).catch((err) => {
+          console.warn('Some resources failed to cache:', err);
+          // Try caching individually
+          return Promise.allSettled(
+            urlsToCache.map(url => 
+              cache.add(url).catch(e => console.warn(`Failed to cache ${url}:`, e))
+            )
+          );
+        });
       })
       .then(() => {
         // Force the waiting service worker to become the active service worker
@@ -48,10 +56,44 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
       .then((cachedResponse) => {
-        // Return cached version immediately for better performance
-        const fetchPromise = fetch(event.request)
+        // For navigation requests, always try network first, then cache
+        if (event.request.mode === 'navigate') {
+          return fetch(event.request)
+            .then((networkResponse) => {
+              // Cache the response
+              if (networkResponse.status === 200) {
+                const responseClone = networkResponse.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                  cache.put(event.request, responseClone);
+                });
+              }
+              return networkResponse;
+            })
+            .catch(() => {
+              // If network fails, return cached index.html
+              return caches.match('/index.html') || cachedResponse;
+            });
+        }
+
+        // For other requests, return cached if available, otherwise fetch
+        if (cachedResponse) {
+          // Update cache in background
+          fetch(event.request)
+            .then((networkResponse) => {
+              if (networkResponse.status === 200) {
+                const responseClone = networkResponse.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                  cache.put(event.request, responseClone);
+                });
+              }
+            })
+            .catch(() => {});
+          return cachedResponse;
+        }
+
+        // No cache, fetch from network
+        return fetch(event.request)
           .then((networkResponse) => {
-            // If we got a valid response, update the cache
             if (networkResponse.status === 200) {
               const responseClone = networkResponse.clone();
               caches.open(CACHE_NAME).then((cache) => {
@@ -61,16 +103,12 @@ self.addEventListener('fetch', (event) => {
             return networkResponse;
           })
           .catch(() => {
-            // If network fails, use cached version or index.html for navigation
+            // If it's a navigation request and fetch fails, return index.html
             if (event.request.mode === 'navigate') {
               return caches.match('/index.html');
             }
-            console.log('Network failed, using cached version for:', event.request.url);
-            return cachedResponse;
+            return networkResponse;
           });
-
-        // Return cached response if available, otherwise wait for network
-        return cachedResponse || fetchPromise;
       })
   );
 });
