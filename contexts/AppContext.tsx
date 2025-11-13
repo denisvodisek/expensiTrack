@@ -48,6 +48,30 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [settings, setSettings] = useState<AppSettings | null>(null);
     const [loading, setLoading] = useState(true);
     
+    // Recalculate credit card balances from all transactions
+    const recalculateCardBalances = useCallback((transactions: Transaction[], cards: CreditCard[]): CreditCard[] => {
+        return cards.map(card => {
+            // Sum all expenses with this cardId (regardless of month)
+            const totalExpenses = transactions
+                .filter(t => t.type === 'expense' && t.cardId === card.id)
+                .reduce((sum, t) => sum + t.amount, 0);
+            
+            // Sum all payments for this cardId (regardless of month)
+            const totalPayments = transactions
+                .filter(t => t.type === 'credit_card_payment' && t.cardId === card.id)
+                .reduce((sum, t) => sum + t.amount, 0);
+            
+            // Balance = expenses - payments
+            const calculatedBalance = Math.max(0, totalExpenses - totalPayments);
+            
+            // Only update if balance changed (to avoid unnecessary API calls)
+            if (card.balance !== calculatedBalance) {
+                return { ...card, balance: calculatedBalance };
+            }
+            return card;
+        });
+    }, []);
+
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
@@ -59,9 +83,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 api.getGoals(),
                 api.getAssets()
             ]);
+            
+            // Recalculate card balances from all transactions
+            const recalculatedCards = recalculateCardBalances(transactionsData, cardsData);
+            
+            // Update cards in storage if balances changed
+            for (const card of recalculatedCards) {
+                if (card.balance !== cardsData.find(c => c.id === card.id)?.balance) {
+                    await api.updateCard(card);
+                }
+            }
+            
             setTransactions(transactionsData);
             setCategories(categoriesData);
-            setCards(cardsData);
+            setCards(recalculatedCards);
             setGoals(goalsData);
             setAssets(assetsData);
             setSettings(currentSettings);
@@ -71,7 +106,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [recalculateCardBalances]);
 
     useEffect(() => {
         loadData();
