@@ -1,5 +1,5 @@
 
-import type { Transaction, Category, CreditCard, Goal, Asset, AppSettings } from '../types';
+import type { Transaction, Category, CreditCard, Goal, Asset, Subscription, AppSettings } from '../types';
 
 const SIMULATED_DELAY = 50; // ms
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
@@ -157,6 +157,35 @@ export const deleteAsset = async (id: string): Promise<void> => {
     set('assets', assets.filter(a => a.id !== id));
 };
 
+// Subscriptions
+export const getSubscriptions = async (): Promise<Subscription[]> => {
+    await delay(SIMULATED_DELAY);
+    return get<Subscription[]>('subscriptions', []);
+};
+
+export const addSubscription = async (subscription: Omit<Subscription, 'id'>): Promise<Subscription> => {
+    await delay(SIMULATED_DELAY);
+    const subscriptions = get<Subscription[]>('subscriptions', []);
+    const newSubscription = { ...subscription, id: `sub-${Date.now()}` };
+    set('subscriptions', [...subscriptions, newSubscription]);
+    return newSubscription;
+};
+
+export const updateSubscription = async (updatedSubscription: Subscription): Promise<Subscription> => {
+    await delay(SIMULATED_DELAY);
+    const subscriptions = get<Subscription[]>('subscriptions', []);
+    const updatedSubscriptions = subscriptions.map(s =>
+        s.id === updatedSubscription.id ? updatedSubscription : s
+    );
+    set('subscriptions', updatedSubscriptions);
+    return updatedSubscription;
+};
+
+export const deleteSubscription = async (id: string): Promise<void> => {
+    await delay(SIMULATED_DELAY);
+    const subscriptions = get<Subscription[]>('subscriptions', []);
+    set('subscriptions', subscriptions.filter(s => s.id !== id));
+};
 
 // Settings
 export const getSettings = async (): Promise<AppSettings> => {
@@ -239,6 +268,9 @@ export const importDataFromJson = async (jsonString: string): Promise<{ success:
         }
         if (Array.isArray(data.assets)) {
             set('assets', data.assets);
+        }
+        if (Array.isArray(data.subscriptions)) {
+            set('subscriptions', data.subscriptions);
         }
         if (data.settings && typeof data.settings === 'object') {
             set('settings', data.settings);

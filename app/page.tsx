@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { AppProvider, useAppContext } from '@/contexts/AppContext';
 import DashboardView from '@/components/views/DashboardView';
 import TransactionsView from '@/components/views/ExpensesView';
+import SubscriptionsView from '@/components/views/SubscriptionsView';
 import ProfileView from '@/components/views/ProfileView';
 import BottomNav from '@/components/BottomNav';
 import { AddIcon } from '@/components/Icons';
@@ -48,6 +49,8 @@ const AppContent: React.FC = () => {
                 return <DashboardView />;
             case 'transactions':
                 return <TransactionsView onEditTransaction={handleEditTransaction} />;
+            case 'subscriptions':
+                return <SubscriptionsView />;
             case 'profile':
                 return <ProfileView />;
             default:

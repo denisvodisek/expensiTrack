@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LayoutIcon, ExpensesIcon, UserIcon } from './Icons';
+import { LayoutIcon, ExpensesIcon, SubscriptionsIcon, UserIcon } from './Icons';
 
 interface NavItemProps {
     icon: React.ElementType;
@@ -27,6 +27,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeView, setActiveView }) => {
     const navItems = [
         { icon: LayoutIcon, label: 'Dashboard', view: 'dashboard' },
         { icon: ExpensesIcon, label: 'Transactions', view: 'transactions' },
+        { icon: SubscriptionsIcon, label: 'Subscriptions', view: 'subscriptions' },
         { icon: UserIcon, label: 'Profile', view: 'profile' },
     ];
 

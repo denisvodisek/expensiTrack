@@ -39,6 +39,19 @@ export interface Asset {
     lastUpdated: string;
 }
 
+export interface Subscription {
+    id: string;
+    name: string;
+    amount: number;
+    frequency: 'monthly' | 'quarterly' | 'semi-annually' | 'annually';
+    category: 'Entertainment' | 'Software' | 'Health' | 'Productivity' | 'News' | 'Other';
+    paymentMethod: 'Cash' | 'Credit Card' | 'PayMe' | 'Octopus' | 'Bank';
+    cardId?: string;
+    startDate: string;
+    active: boolean;
+    notes?: string;
+}
+
 export interface AppSettings {
     privacyMode: boolean;
     userName: string;

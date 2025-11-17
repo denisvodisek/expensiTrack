@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import type { Transaction, Category, CreditCard, Goal, Asset, AppSettings } from '@/types';
+import type { Transaction, Category, CreditCard, Goal, Asset, Subscription, AppSettings } from '@/types';
 import * as api from '@/services/api';
 
 interface AppContextType {
@@ -10,6 +10,7 @@ interface AppContextType {
     cards: CreditCard[];
     goals: Goal[];
     assets: Asset[];
+    subscriptions: Subscription[];
     settings: AppSettings | null;
     loading: boolean;
     addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<void>;
@@ -25,6 +26,9 @@ interface AppContextType {
     addAsset: (asset: Omit<Asset, 'id' | 'lastUpdated'>) => Promise<void>;
     updateAsset: (asset: Asset) => Promise<void>;
     deleteAsset: (id: string) => Promise<void>;
+    addSubscription: (subscription: Omit<Subscription, 'id'>) => Promise<void>;
+    updateSubscription: (subscription: Subscription) => Promise<void>;
+    deleteSubscription: (id: string) => Promise<void>;
     updateSettings: (newSettings: Partial<AppSettings>) => Promise<void>;
     getCardById: (id: string) => CreditCard | undefined;
 }
@@ -45,6 +49,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [cards, setCards] = useState<CreditCard[]>([]);
     const [goals, setGoals] = useState<Goal[]>([]);
     const [assets, setAssets] = useState<Asset[]>([]);
+    const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
     const [settings, setSettings] = useState<AppSettings | null>(null);
     const [loading, setLoading] = useState(true);
     
@@ -76,12 +81,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setLoading(true);
         try {
             const currentSettings = await api.getSettings();
-            const [transactionsData, categoriesData, cardsData, goalsData, assetsData] = await Promise.all([
+            const [transactionsData, categoriesData, cardsData, goalsData, assetsData, subscriptionsData] = await Promise.all([
                 api.getTransactions(),
                 api.getCategories(),
                 api.getCards(),
                 api.getGoals(),
-                api.getAssets()
+                api.getAssets(),
+                api.getSubscriptions()
             ]);
             
             // Recalculate card balances from all transactions
@@ -229,6 +235,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setAssets(prev => prev.filter(a => a.id !== id));
     };
 
+    const addSubscription = async (subscription: Omit<Subscription, 'id'>) => {
+        const newSubscription = await api.addSubscription(subscription);
+        setSubscriptions(prev => [...prev, newSubscription]);
+    };
+
+    const updateSubscription = async (subscription: Subscription) => {
+        const updatedSubscription = await api.updateSubscription(subscription);
+        setSubscriptions(prev => prev.map(s => s.id === subscription.id ? updatedSubscription : s));
+    };
+
+    const deleteSubscription = async (id: string) => {
+        await api.deleteSubscription(id);
+        setSubscriptions(prev => prev.filter(s => s.id !== id));
+    };
+
     const updateSettings = async (newSettings: Partial<AppSettings>) => {
         const updatedSettings = await api.updateSettings(newSettings);
         setSettings(updatedSettings);
@@ -241,12 +262,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     return (
         <AppContext.Provider value={{
-            transactions, categories, cards, goals, assets, settings, loading,
+            transactions, categories, cards, goals, assets, subscriptions, settings, loading,
             addTransaction, updateTransaction, deleteTransaction,
             addCategory,
             addCard, updateCard, archiveCard,
             addGoal, updateGoal, deleteGoal,
             addAsset, updateAsset, deleteAsset,
+            addSubscription, updateSubscription, deleteSubscription,
             updateSettings, getCardById
         }}>
             {children}

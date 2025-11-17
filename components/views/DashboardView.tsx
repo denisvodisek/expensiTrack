@@ -10,53 +10,34 @@ import { formatCurrency } from '@/lib/currency';
 const AnimatedBackground: React.FC = () => {
     return (
         <div className="fixed top-0 left-0 right-0 h-[40vh] -z-10 overflow-hidden">
-            {/* Diagonal gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-pink-600/10" />
-
-            {/* Animated gradient waves */}
-            <div className="absolute inset-0 opacity-30">
-                <div
-                    className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-blue-400/20 to-transparent animate-pulse"
-                    style={{
-                        background: 'linear-gradient(45deg, transparent, rgba(59, 130, 246, 0.1), transparent)',
-                        animation: 'waveMove 8s ease-in-out infinite'
-                    }}
+            {/* SVG Wave Background */}
+            <svg
+                className="absolute inset-0 w-full h-full"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 1440 320"
+                preserveAspectRatio="none"
+                style={{ transform: 'rotate(180deg)' }}
+            >
+                <defs>
+                    <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity="0.08" />
+                        <stop offset="50%" stopColor="rgb(147, 51, 234)" stopOpacity="0.12" />
+                        <stop offset="100%" stopColor="rgb(236, 72, 153)" stopOpacity="0.06" />
+                    </linearGradient>
+                </defs>
+                <path
+                    fill="url(#waveGradient)"
+                    d="M0,160L80,138.7C160,117,320,75,480,64C640,53,800,75,960,69.3C1120,64,1280,32,1360,16L1440,0L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
+                    className="animate-pulse"
+                    style={{ animation: 'waveFlow 8s ease-in-out infinite' }}
                 />
-                <div
-                    className="absolute top-1/3 left-0 w-full h-full bg-gradient-to-r from-transparent via-purple-400/20 to-transparent animate-pulse"
-                    style={{
-                        background: 'linear-gradient(-45deg, transparent, rgba(147, 51, 234, 0.1), transparent)',
-                        animation: 'waveMove 12s ease-in-out infinite reverse'
-                    }}
-                />
-                <div
-                    className="absolute top-2/3 left-0 w-full h-full bg-gradient-to-r from-transparent via-pink-400/20 to-transparent animate-pulse"
-                    style={{
-                        background: 'linear-gradient(45deg, transparent, rgba(236, 72, 153, 0.1), transparent)',
-                        animation: 'waveMove 10s ease-in-out infinite'
-                    }}
-                />
-            </div>
-
-            {/* Floating gradient orbs */}
-            <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-full blur-3xl animate-bounce"
-                 style={{ animation: 'float 15s ease-in-out infinite' }} />
-            <div className="absolute bottom-32 left-16 w-48 h-48 bg-gradient-to-br from-purple-500/5 to-pink-500/5 rounded-full blur-3xl animate-bounce"
-                 style={{ animation: 'float 20s ease-in-out infinite reverse' }} />
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-br from-pink-500/5 to-blue-500/5 rounded-full blur-2xl animate-pulse"
-                 style={{ animation: 'float 18s ease-in-out infinite' }} />
+            </svg>
 
             <style dangerouslySetInnerHTML={{
                 __html: `
-                    @keyframes waveMove {
-                        0%, 100% { transform: translateX(-100vw) scaleY(0.5); opacity: 0; }
-                        50% { transform: translateX(0vw) scaleY(1); opacity: 0.6; }
-                    }
-                    @keyframes float {
-                        0%, 100% { transform: translate(0, 0) rotate(0deg); }
-                        25% { transform: translate(20px, -20px) rotate(90deg); }
-                        50% { transform: translate(-10px, 10px) rotate(180deg); }
-                        75% { transform: translate(10px, -10px) rotate(270deg); }
+                    @keyframes waveFlow {
+                        0%, 100% { transform: translateY(0px) scale(1); }
+                        50% { transform: translateY(-5px) scale(1.02); }
                     }
                 `
             }} />
