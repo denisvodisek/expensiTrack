@@ -127,7 +127,7 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({ onEditTransaction }
                 <div className="flex space-x-2 bg-secondary p-1 rounded-md">
                     <FilterButton label="This Mnth" period="month" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
                     <FilterButton label="Last Mnth" period="last-month" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
-                    <FilterButton label="Last 3 Mths" period="quarter" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
+                    <FilterButton label="Last Qtr" period="quarter" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
                     <FilterButton label="Custom" period="custom" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
                 </div>
 
