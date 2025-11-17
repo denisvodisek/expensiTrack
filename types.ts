@@ -15,6 +15,7 @@ export interface Category {
     name: string;
     type: 'income' | 'expense';
     emoji: string;
+    order: number;
 }
 
 export interface CreditCard {

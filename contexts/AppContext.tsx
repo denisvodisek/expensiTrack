@@ -16,8 +16,9 @@ interface AppContextType {
     addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<void>;
     updateTransaction: (transaction: Transaction) => Promise<void>;
     deleteTransaction: (id: string) => Promise<void>;
-    addCategory: (category: Omit<Category, 'id'>) => Promise<void>;
+    addCategory: (category: Omit<Category, 'id' | 'order'>) => Promise<void>;
     updateCategory: (category: Category) => Promise<void>;
+    reorderCategories: (categoryId1: string, categoryId2: string) => Promise<void>;
     addCard: (card: Omit<CreditCard, 'id' | 'balance' | 'archived'>) => Promise<void>;
     updateCard: (card: CreditCard) => Promise<void>;
     archiveCard: (id: string) => Promise<void>;
@@ -192,6 +193,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setCategories(prev => prev.map(c => c.id === updatedCategory.id ? updatedCategory : c));
     };
 
+    const reorderCategories = async (categoryId1: string, categoryId2: string) => {
+        await api.reorderCategories(categoryId1, categoryId2);
+        // Refetch categories to get updated order
+        const updatedCategories = await api.getCategories();
+        setCategories(updatedCategories);
+    };
+
     const addCard = async (cardData: Omit<CreditCard, 'id' | 'balance' | 'archived'>) => {
         const newCard = await api.addCard(cardData);
         setCards(prev => [...prev, newCard]);
@@ -270,7 +278,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         <AppContext.Provider value={{
             transactions, categories, cards, goals, assets, subscriptions, settings, loading,
             addTransaction, updateTransaction, deleteTransaction,
-            addCategory, updateCategory,
+            addCategory, updateCategory, reorderCategories,
             addCard, updateCard, archiveCard,
             addGoal, updateGoal, deleteGoal,
             addAsset, updateAsset, deleteAsset,

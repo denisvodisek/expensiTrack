@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { DeleteIcon, CheckCircleIcon, SunIcon, MoonIcon, PrivacyOnIcon, PrivacyOffIcon, CloseIcon } from '@/components/Icons';
+import { DeleteIcon, CheckCircleIcon, SunIcon, MoonIcon, PrivacyOnIcon, PrivacyOffIcon, CloseIcon, EditIcon } from '@/components/Icons';
 import PrivacyWrapper from '@/components/PrivacyWrapper';
 import { downloadDataAsJson, importDataFromFile } from '@/services/api';
 import { formatCurrency } from '@/lib/currency';
@@ -9,24 +9,325 @@ import type { Category } from '@/types';
 
 const currencyFormatter = new Intl.NumberFormat('en-HK', { style: 'currency', currency: 'HKD' });
 
+// Category Editor Modal
+const CategoryEditorModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+    const { categories, addCategory, updateCategory, reorderCategories } = useAppContext();
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+
+    const handleEditCategory = (category: Category) => {
+        setEditingCategory(category);
+        setShowEditModal(true);
+    };
+
+    const handleMoveUp = async (categoryId: string, type: 'expense' | 'income') => {
+        const categoryList = categories.filter(c => c.type === type).sort((a, b) => (a.order || 0) - (b.order || 0));
+        const currentIndex = categoryList.findIndex(c => c.id === categoryId);
+        if (currentIndex > 0) {
+            const prevCategory = categoryList[currentIndex - 1];
+            await reorderCategories(categoryId, prevCategory.id);
+        }
+    };
+
+    const handleMoveDown = async (categoryId: string, type: 'expense' | 'income') => {
+        const categoryList = categories.filter(c => c.type === type).sort((a, b) => (a.order || 0) - (b.order || 0));
+        const currentIndex = categoryList.findIndex(c => c.id === categoryId);
+        if (currentIndex < categoryList.length - 1) {
+            const nextCategory = categoryList[currentIndex + 1];
+            await reorderCategories(categoryId, nextCategory.id);
+        }
+    };
+
+    return (
+        <>
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-start z-50 p-4">
+                <div className="bg-card border border-border rounded-lg w-full max-w-md mx-auto max-h-[90vh] overflow-hidden flex flex-col">
+                    {/* Header */}
+                    <div className="flex items-center justify-between p-4 border-b border-border">
+                        <h2 className="text-lg sm:text-xl font-bold font-display">Category Editor</h2>
+                        <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground">
+                            <CloseIcon className="w-6 h-6" />
+                        </button>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                        <div className="flex justify-between items-center">
+                            <p className="text-sm text-muted-foreground">Customize your categories</p>
+                            <button
+                                onClick={() => setShowAddModal(true)}
+                                className="bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-sm font-semibold hover:opacity-90 transition-opacity"
+                            >
+                                Add Category
+                            </button>
+                        </div>
+
+                        {/* Categories List */}
+                        <div className="space-y-4">
+                            <div>
+                                <h3 className="text-sm font-semibold text-muted-foreground mb-2">Expense Categories</h3>
+                        <div className="grid gap-2">
+                            {categories.filter(c => c.type === 'expense').sort((a, b) => (a.order || 0) - (b.order || 0)).map((category, index, arr) => (
+                                        <div key={category.id} className="flex items-center justify-between p-3 bg-secondary rounded-md">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-lg">{category.emoji}</span>
+                                                <span className="font-medium">{category.name}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={() => handleMoveUp(category.id, 'expense')}
+                                                    disabled={index === 0}
+                                                    className={`p-1 rounded text-xs ${index === 0 ? 'text-muted-foreground cursor-not-allowed' : 'text-foreground hover:bg-background'}`}
+                                                    title="Move up"
+                                                >
+                                                    ↑
+                                                </button>
+                                                <button
+                                                    onClick={() => handleMoveDown(category.id, 'expense')}
+                                                    disabled={index === arr.length - 1}
+                                                    className={`p-1 rounded text-xs ${index === arr.length - 1 ? 'text-muted-foreground cursor-not-allowed' : 'text-foreground hover:bg-background'}`}
+                                                    title="Move down"
+                                                >
+                                                    ↓
+                                                </button>
+                                                <button
+                                                    onClick={() => handleEditCategory(category)}
+                                                    className="text-muted-foreground hover:text-foreground px-2 py-1 text-sm"
+                                                >
+                                                    Edit
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 className="text-sm font-semibold text-muted-foreground mb-2">Income Categories</h3>
+                        <div className="grid gap-2">
+                            {categories.filter(c => c.type === 'income').sort((a, b) => (a.order || 0) - (b.order || 0)).map((category, index, arr) => (
+                                        <div key={category.id} className="flex items-center justify-between p-3 bg-secondary rounded-md">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-lg">{category.emoji}</span>
+                                                <span className="font-medium">{category.name}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={() => handleMoveUp(category.id, 'income')}
+                                                    disabled={index === 0}
+                                                    className={`p-1 rounded text-xs ${index === 0 ? 'text-muted-foreground cursor-not-allowed' : 'text-foreground hover:bg-background'}`}
+                                                    title="Move up"
+                                                >
+                                                    ↑
+                                                </button>
+                                                <button
+                                                    onClick={() => handleMoveDown(category.id, 'income')}
+                                                    disabled={index === arr.length - 1}
+                                                    className={`p-1 rounded text-xs ${index === arr.length - 1 ? 'text-muted-foreground cursor-not-allowed' : 'text-foreground hover:bg-background'}`}
+                                                    title="Move down"
+                                                >
+                                                    ↓
+                                                </button>
+                                                <button
+                                                    onClick={() => handleEditCategory(category)}
+                                                    className="text-muted-foreground hover:text-foreground px-2 py-1 text-sm"
+                                                >
+                                                    Edit
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Add Category Modal */}
+                    {showAddModal && (
+                        <CategoryModal
+                            onClose={() => setShowAddModal(false)}
+                            onSave={async (categoryData) => {
+                                await addCategory(categoryData);
+                                setShowAddModal(false);
+                            }}
+                        />
+                    )}
+
+                    {/* Edit Category Modal */}
+                    {showEditModal && editingCategory && (
+                        <CategoryModal
+                            category={editingCategory}
+                            onClose={() => {
+                                setShowEditModal(false);
+                                setEditingCategory(null);
+                            }}
+                            onSave={async (categoryData) => {
+                                if (editingCategory) {
+                                    await updateCategory({ ...editingCategory, ...categoryData });
+                                }
+                                setShowEditModal(false);
+                                setEditingCategory(null);
+                            }}
+                        />
+                    )}
+                </div>
+            </div>
+        </>
+    );
+};
+
+// Category Modal Component
+interface CategoryModalProps {
+    category?: Category | null;
+    onClose: () => void;
+    onSave: (category: Omit<Category, 'id'>) => void;
+}
+
+const CategoryModal: React.FC<CategoryModalProps> = ({ category, onClose, onSave }) => {
+    const [formData, setFormData] = useState({
+        name: category?.name || '',
+        emoji: category?.emoji || '',
+        type: category?.type || 'expense' as 'expense' | 'income'
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (formData.name.trim() && formData.emoji.trim()) {
+            onSave({
+                name: formData.name.trim(),
+                emoji: formData.emoji.trim(),
+                type: formData.type
+            });
+        }
+    };
+
+    return (
+        <>
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2">
+                <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md relative">
+                    <button type="button" onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
+                        <CloseIcon className="w-6 h-6" />
+                    </button>
+
+                    <h2 className="text-xl font-bold text-center text-foreground font-display mb-6">
+                        {category ? 'Edit Category' : 'Add Category'}
+                    </h2>
+
+                    <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-muted-foreground mb-1">Emoji</label>
+                                <input
+                                    type="text"
+                                    value={formData.emoji}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, emoji: e.target.value }))}
+                                    placeholder="😊"
+                                    maxLength={2}
+                                    className="w-full bg-secondary border border-border rounded-md px-3 py-2 text-center text-2xl text-foreground"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-muted-foreground mb-1">Name</label>
+                                <input
+                                    type="text"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                                    placeholder="Category name"
+                                    className="w-full bg-secondary border border-border rounded-md px-3 py-2 text-foreground"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-muted-foreground mb-2">Type</label>
+                            <div className="grid grid-cols-2 gap-2 p-1 bg-secondary rounded-md">
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, type: 'expense' }))}
+                                    className={`w-full py-1.5 rounded text-sm font-semibold ${formData.type === 'expense' ? 'bg-destructive text-destructive-foreground' : 'text-muted-foreground'}`}
+                                >
+                                    Expense
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, type: 'income' }))}
+                                    className={`w-full py-1.5 rounded text-sm font-semibold ${formData.type === 'income' ? 'bg-green-600 text-white' : 'text-muted-foreground'}`}
+                                >
+                                    Income
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-2 pt-4">
+                            <button type="submit" className="flex-1 bg-primary text-primary-foreground font-bold py-2 rounded-md hover:opacity-90 transition-opacity">
+                                {category ? 'Update Category' : 'Add Category'}
+                            </button>
+                            <button type="button" onClick={onClose} className="flex-1 bg-secondary text-foreground font-bold py-2 rounded-md hover:opacity-90 transition-opacity">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </>
+    );
+};
+
 // Main Profile View Component
 const ProfileView: React.FC = () => {
-    const { settings, updateSettings } = useAppContext();
+    const { settings, updateSettings, categories } = useAppContext();
+    const [showCategoryEditor, setShowCategoryEditor] = useState(false);
+
     if (!settings) return null;
     return (
-        <div className="p-3 sm:p-4 space-y-6 sm:space-y-8">
-            <header className="flex justify-between items-center">
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground font-display">Profile & Settings</h1>
-                 <button onClick={() => updateSettings({ privacyMode: !settings.privacyMode })} className="text-muted-foreground hover:text-foreground p-2 rounded-full">
-                    {settings.privacyMode ? <PrivacyOnIcon className="w-6 h-6" /> : <PrivacyOffIcon className="w-6 h-6" />}
-                </button>
-            </header>
-            <NetWorthSection />
-            <GoalsSection />
-            <CardsSection />
-            <CategoryEditorSection />
-            <SettingsSection />
-        </div>
+        <>
+            <div className="p-3 sm:p-4 space-y-6 sm:space-y-8">
+                <header className="flex justify-between items-center">
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground font-display">Profile & Settings</h1>
+                     <button onClick={() => updateSettings({ privacyMode: !settings.privacyMode })} className="text-muted-foreground hover:text-foreground p-2 rounded-full">
+                        {settings.privacyMode ? <PrivacyOnIcon className="w-6 h-6" /> : <PrivacyOffIcon className="w-6 h-6" />}
+                    </button>
+                </header>
+                <NetWorthSection />
+                <GoalsSection />
+                <CardsSection />
+                <SettingsSection />
+{/* Category Editor Button */}
+<section className="space-y-4">
+                    <div className="bg-card border border-border rounded-lg p-4">
+                        <button
+                            onClick={() => setShowCategoryEditor(true)}
+                            className="w-full flex items-center justify-between p-4 group"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                    <EditIcon className="w-5 h-5 text-primary" />
+                                </div>
+                                <div className="text-left">
+                                    <h3 className="font-semibold text-foreground">Category Editor</h3>
+                                    <p className="text-sm text-muted-foreground">Customize your expense and income categories</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="text-xs text-primary font-medium bg-primary/10 px-2 py-1 rounded-full">
+                                    {categories.length} categories
+                                </div>
+                                <span className="text-primary group-hover:translate-x-1 transition-transform">→</span>
+                            </div>
+                        </button>
+                    </div>
+                </section>
+                
+            </div>
+
+            {/* Category Editor Modal */}
+            {showCategoryEditor && (
+                <CategoryEditorModal onClose={() => setShowCategoryEditor(false)} />
+            )}
+        </>
     );
 };
 
@@ -583,261 +884,6 @@ const SettingsSection: React.FC = () => {
                 </div>
             </div>
         </section>
-    );
-};
-
-// Category Editor Section
-const CategoryEditorSection: React.FC = () => {
-    const { categories, addCategory, updateCategory } = useAppContext();
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-
-    const handleEditCategory = (category: Category) => {
-        setEditingCategory(category);
-        setShowEditModal(true);
-    };
-
-    const handleMoveUp = (categoryId: string, type: 'expense' | 'income') => {
-        const categoryList = categories.filter(c => c.type === type);
-        const currentIndex = categoryList.findIndex(c => c.id === categoryId);
-        if (currentIndex > 0) {
-            // For now, just reorder in display - in a real app you'd persist this
-            console.log('Moving category up:', categoryId);
-        }
-    };
-
-    const handleMoveDown = (categoryId: string, type: 'expense' | 'income') => {
-        const categoryList = categories.filter(c => c.type === type);
-        const currentIndex = categoryList.findIndex(c => c.id === categoryId);
-        if (currentIndex < categoryList.length - 1) {
-            // For now, just reorder in display - in a real app you'd persist this
-            console.log('Moving category down:', categoryId);
-        }
-    };
-
-    return (
-        <section className="space-y-4">
-            <h2 className="text-lg sm:text-xl font-bold font-display">Category Editor</h2>
-            <div className="bg-card border border-border rounded-lg p-4 space-y-4">
-                <div className="flex justify-between items-center">
-                    <p className="text-sm text-muted-foreground">Customize your expense and income categories</p>
-                    <button
-                        onClick={() => setShowAddModal(true)}
-                        className="bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-sm font-semibold hover:opacity-90 transition-opacity"
-                    >
-                        Add Category
-                    </button>
-                </div>
-
-                {/* Categories List */}
-                <div className="space-y-4">
-                    <div>
-                        <h3 className="text-sm font-semibold text-muted-foreground mb-2">Expense Categories</h3>
-                        <div className="grid gap-2">
-                            {categories.filter(c => c.type === 'expense').map((category, index, arr) => (
-                                <div key={category.id} className="flex items-center justify-between p-3 bg-secondary rounded-md">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-lg">{category.emoji}</span>
-                                        <span className="font-medium">{category.name}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <button
-                                            onClick={() => handleMoveUp(category.id, 'expense')}
-                                            disabled={index === 0}
-                                            className={`p-1 rounded text-xs ${index === 0 ? 'text-muted-foreground cursor-not-allowed' : 'text-foreground hover:bg-background'}`}
-                                            title="Move up"
-                                        >
-                                            ↑
-                                        </button>
-                                        <button
-                                            onClick={() => handleMoveDown(category.id, 'expense')}
-                                            disabled={index === arr.length - 1}
-                                            className={`p-1 rounded text-xs ${index === arr.length - 1 ? 'text-muted-foreground cursor-not-allowed' : 'text-foreground hover:bg-background'}`}
-                                            title="Move down"
-                                        >
-                                            ↓
-                                        </button>
-                                        <button
-                                            onClick={() => handleEditCategory(category)}
-                                            className="text-muted-foreground hover:text-foreground px-2 py-1 text-sm"
-                                        >
-                                            Edit
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 className="text-sm font-semibold text-muted-foreground mb-2">Income Categories</h3>
-                        <div className="grid gap-2">
-                            {categories.filter(c => c.type === 'income').map((category, index, arr) => (
-                                <div key={category.id} className="flex items-center justify-between p-3 bg-secondary rounded-md">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-lg">{category.emoji}</span>
-                                        <span className="font-medium">{category.name}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <button
-                                            onClick={() => handleMoveUp(category.id, 'income')}
-                                            disabled={index === 0}
-                                            className={`p-1 rounded text-xs ${index === 0 ? 'text-muted-foreground cursor-not-allowed' : 'text-foreground hover:bg-background'}`}
-                                            title="Move up"
-                                        >
-                                            ↑
-                                        </button>
-                                        <button
-                                            onClick={() => handleMoveDown(category.id, 'income')}
-                                            disabled={index === arr.length - 1}
-                                            className={`p-1 rounded text-xs ${index === arr.length - 1 ? 'text-muted-foreground cursor-not-allowed' : 'text-foreground hover:bg-background'}`}
-                                            title="Move down"
-                                        >
-                                            ↓
-                                        </button>
-                                        <button
-                                            onClick={() => handleEditCategory(category)}
-                                            className="text-muted-foreground hover:text-foreground px-2 py-1 text-sm"
-                                        >
-                                            Edit
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Add Category Modal */}
-            {showAddModal && (
-                <CategoryModal
-                    onClose={() => setShowAddModal(false)}
-                    onSave={async (categoryData) => {
-                        await addCategory(categoryData);
-                        setShowAddModal(false);
-                    }}
-                />
-            )}
-
-            {/* Edit Category Modal */}
-            {showEditModal && editingCategory && (
-                <CategoryModal
-                    category={editingCategory}
-                    onClose={() => {
-                        setShowEditModal(false);
-                        setEditingCategory(null);
-                    }}
-                    onSave={async (categoryData) => {
-                        if (editingCategory) {
-                            await updateCategory({ ...editingCategory, ...categoryData });
-                        }
-                        setShowEditModal(false);
-                        setEditingCategory(null);
-                    }}
-                />
-            )}
-        </section>
-    );
-};
-
-// Category Modal Component
-interface CategoryModalProps {
-    category?: Category | null;
-    onClose: () => void;
-    onSave: (category: Omit<Category, 'id'>) => void;
-}
-
-const CategoryModal: React.FC<CategoryModalProps> = ({ category, onClose, onSave }) => {
-    const [formData, setFormData] = useState({
-        name: category?.name || '',
-        emoji: category?.emoji || '',
-        type: category?.type || 'expense' as 'expense' | 'income'
-    });
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (formData.name.trim() && formData.emoji.trim()) {
-            onSave({
-                name: formData.name.trim(),
-                emoji: formData.emoji.trim(),
-                type: formData.type
-            });
-        }
-    };
-
-    return (
-        <>
-            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2">
-                <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md relative">
-                    <button type="button" onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
-                        <CloseIcon className="w-6 h-6" />
-                    </button>
-
-                    <h2 className="text-xl font-bold text-center text-foreground font-display mb-6">
-                        {category ? 'Edit Category' : 'Add Category'}
-                    </h2>
-
-                    <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-semibold text-muted-foreground mb-1">Emoji</label>
-                                <input
-                                    type="text"
-                                    value={formData.emoji}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, emoji: e.target.value }))}
-                                    placeholder="😊"
-                                    maxLength={2}
-                                    className="w-full bg-secondary border border-border rounded-md px-3 py-2 text-center text-2xl text-foreground"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-muted-foreground mb-1">Name</label>
-                                <input
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                                    placeholder="Category name"
-                                    className="w-full bg-secondary border border-border rounded-md px-3 py-2 text-foreground"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-muted-foreground mb-2">Type</label>
-                            <div className="grid grid-cols-2 gap-2 p-1 bg-secondary rounded-md">
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData(prev => ({ ...prev, type: 'expense' }))}
-                                    className={`w-full py-1.5 rounded text-sm font-semibold ${formData.type === 'expense' ? 'bg-destructive text-destructive-foreground' : 'text-muted-foreground'}`}
-                                >
-                                    Expense
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData(prev => ({ ...prev, type: 'income' }))}
-                                    className={`w-full py-1.5 rounded text-sm font-semibold ${formData.type === 'income' ? 'bg-green-600 text-white' : 'text-muted-foreground'}`}
-                                >
-                                    Income
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="flex gap-2 pt-4">
-                            <button type="submit" className="flex-1 bg-primary text-primary-foreground font-bold py-2 rounded-md hover:opacity-90 transition-opacity">
-                                {category ? 'Update Category' : 'Add Category'}
-                            </button>
-                            <button type="button" onClick={onClose} className="flex-1 bg-secondary text-foreground font-bold py-2 rounded-md hover:opacity-90 transition-opacity">
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </>
     );
 };
 

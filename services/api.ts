@@ -5,15 +5,15 @@ const SIMULATED_DELAY = 50; // ms
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 const defaultCategories: Category[] = [
-    { id: 'cat-exp-1', name: 'Food', type: 'expense', emoji: '🍔' },
-    { id: 'cat-exp-2', name: 'Transport', type: 'expense', emoji: '🚗' },
-    { id: 'cat-exp-3', name: 'Entertainment', type: 'expense', emoji: '🎬' },
-    { id: 'cat-exp-4', name: 'Shopping', type: 'expense', emoji: '🛍️' },
-    { id: 'cat-exp-5', name: 'Health', type: 'expense', emoji: '❤️‍🩹' },
-    { id: 'cat-exp-6', name: 'Utilities', type: 'expense', emoji: '💡' },
-    { id: 'cat-inc-1', name: 'Salary', type: 'income', emoji: '💰' },
-    { id: 'cat-inc-2', name: 'Gift', type: 'income', emoji: '🎁' },
-    { id: 'cat-inc-3', name: 'Payback', type: 'income', emoji: '🤝' },
+    { id: 'cat-exp-1', name: 'Food', type: 'expense', emoji: '🍔', order: 1 },
+    { id: 'cat-exp-2', name: 'Transport', type: 'expense', emoji: '🚗', order: 2 },
+    { id: 'cat-exp-3', name: 'Entertainment', type: 'expense', emoji: '🎬', order: 3 },
+    { id: 'cat-exp-4', name: 'Shopping', type: 'expense', emoji: '🛍️', order: 4 },
+    { id: 'cat-exp-5', name: 'Health', type: 'expense', emoji: '❤️‍🩹', order: 5 },
+    { id: 'cat-exp-6', name: 'Utilities', type: 'expense', emoji: '💡', order: 6 },
+    { id: 'cat-inc-1', name: 'Salary', type: 'income', emoji: '💰', order: 1 },
+    { id: 'cat-inc-2', name: 'Gift', type: 'income', emoji: '🎁', order: 2 },
+    { id: 'cat-inc-3', name: 'Payback', type: 'income', emoji: '🤝', order: 3 },
 ];
 
 const get = <T,>(key: string, defaultValue: T): T => {
@@ -71,10 +71,13 @@ export const getCategories = async (): Promise<Category[]> => {
     return categories;
 };
 
-export const addCategory = async (category: Omit<Category, 'id'>): Promise<Category> => {
+export const addCategory = async (category: Omit<Category, 'id' | 'order'>): Promise<Category> => {
     await delay(SIMULATED_DELAY);
     const categories = get<Category[]>('categories', []);
-    const newCategory = { ...category, id: `cat-${Date.now()}` };
+    const maxOrder = categories
+        .filter(c => c.type === category.type)
+        .reduce((max, c) => Math.max(max, c.order || 0), 0);
+    const newCategory = { ...category, id: `cat-${Date.now()}`, order: maxOrder + 1 };
     set('categories', [...categories, newCategory]);
     return newCategory;
 };
@@ -87,6 +90,26 @@ export const updateCategory = async (updatedCategory: Category): Promise<Categor
     );
     set('categories', updatedCategories);
     return updatedCategory;
+};
+
+export const reorderCategories = async (categoryId1: string, categoryId2: string): Promise<void> => {
+    await delay(SIMULATED_DELAY);
+    const categories = get<Category[]>('categories', []);
+    const category1 = categories.find(c => c.id === categoryId1);
+    const category2 = categories.find(c => c.id === categoryId2);
+
+    if (category1 && category2 && category1.type === category2.type) {
+        // Swap their order values
+        const tempOrder = category1.order;
+        category1.order = category2.order;
+        category2.order = tempOrder;
+
+        const updatedCategories = categories.map(c =>
+            c.id === categoryId1 ? category1 :
+            c.id === categoryId2 ? category2 : c
+        );
+        set('categories', updatedCategories);
+    }
 };
 
 // Credit Cards
