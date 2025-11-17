@@ -79,6 +79,16 @@ export const addCategory = async (category: Omit<Category, 'id'>): Promise<Categ
     return newCategory;
 };
 
+export const updateCategory = async (updatedCategory: Category): Promise<Category> => {
+    await delay(SIMULATED_DELAY);
+    const categories = get<Category[]>('categories', []);
+    const updatedCategories = categories.map(c =>
+        c.id === updatedCategory.id ? updatedCategory : c
+    );
+    set('categories', updatedCategories);
+    return updatedCategory;
+};
+
 // Credit Cards
 export const getCards = async (): Promise<CreditCard[]> => {
     await delay(SIMULATED_DELAY);

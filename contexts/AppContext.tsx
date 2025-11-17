@@ -17,6 +17,7 @@ interface AppContextType {
     updateTransaction: (transaction: Transaction) => Promise<void>;
     deleteTransaction: (id: string) => Promise<void>;
     addCategory: (category: Omit<Category, 'id'>) => Promise<void>;
+    updateCategory: (category: Category) => Promise<void>;
     addCard: (card: Omit<CreditCard, 'id' | 'balance' | 'archived'>) => Promise<void>;
     updateCard: (card: CreditCard) => Promise<void>;
     archiveCard: (id: string) => Promise<void>;
@@ -186,6 +187,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setCategories(prev => [...prev, newCategory]);
     };
 
+    const updateCategory = async (categoryData: Category) => {
+        const updatedCategory = await api.updateCategory(categoryData);
+        setCategories(prev => prev.map(c => c.id === updatedCategory.id ? updatedCategory : c));
+    };
+
     const addCard = async (cardData: Omit<CreditCard, 'id' | 'balance' | 'archived'>) => {
         const newCard = await api.addCard(cardData);
         setCards(prev => [...prev, newCard]);
@@ -264,7 +270,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         <AppContext.Provider value={{
             transactions, categories, cards, goals, assets, subscriptions, settings, loading,
             addTransaction, updateTransaction, deleteTransaction,
-            addCategory,
+            addCategory, updateCategory,
             addCard, updateCard, archiveCard,
             addGoal, updateGoal, deleteGoal,
             addAsset, updateAsset, deleteAsset,

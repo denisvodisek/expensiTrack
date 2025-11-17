@@ -5,7 +5,7 @@ import type { Subscription } from '@/types';
 import { CloseIcon } from '@/components/Icons';
 
 const SubscriptionsView: React.FC = () => {
-    const { subscriptions, addSubscription, updateSubscription, deleteSubscription } = useAppContext();
+    const { subscriptions, addSubscription, updateSubscription, deleteSubscription, categories } = useAppContext();
     const [showAddModal, setShowAddModal] = useState(false);
     const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
 
@@ -44,16 +44,9 @@ const SubscriptionsView: React.FC = () => {
         await updateSubscription({ ...subscription, active: !subscription.active });
     };
 
-    const getCategoryEmoji = (category: Subscription['category']) => {
-        const emojis = {
-            'Entertainment': '🎬',
-            'Software': '💻',
-            'Health': '❤️‍🩹',
-            'Productivity': '⚡',
-            'News': '📰',
-            'Other': '📦'
-        };
-        return emojis[category] || '📦';
+    const getCategoryEmoji = (categoryName: string) => {
+        const category = categories.find(c => c.name === categoryName);
+        return category?.emoji || '📦';
     };
 
     const getMonthlyAmount = (subscription: Subscription) => {
@@ -308,23 +301,21 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ subscription, onC
                         </div>
                     </div>
 
-                    {subscription?.type !== 'income' && (
-                        <div>
-                            <h3 className="text-sm font-semibold text-muted-foreground mb-2">Payment Method</h3>
-                            <div className="grid grid-cols-3 gap-2">
-                                {['Cash', 'Credit Card', 'PayMe', 'Octopus', 'Bank'].map(method => (
-                                    <button
-                                        type="button"
-                                        key={method}
-                                        onClick={() => setFormData(prev => ({ ...prev, paymentMethod: method as Subscription['paymentMethod'] }))}
-                                        className={`py-2 rounded-md text-xs font-semibold transition ${formData.paymentMethod === method ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}
-                                    >
-                                        {method}
-                                    </button>
-                                ))}
-                            </div>
+                    <div>
+                        <h3 className="text-sm font-semibold text-muted-foreground mb-2">Payment Method</h3>
+                        <div className="grid grid-cols-3 gap-2">
+                            {['Cash', 'Credit Card', 'PayMe', 'Octopus', 'Bank'].map(method => (
+                                <button
+                                    type="button"
+                                    key={method}
+                                    onClick={() => setFormData(prev => ({ ...prev, paymentMethod: method as Subscription['paymentMethod'] }))}
+                                    className={`py-2 rounded-md text-xs font-semibold transition ${formData.paymentMethod === method ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}
+                                >
+                                    {method}
+                                </button>
+                            ))}
                         </div>
-                    )}
+                    </div>
 
                     {formData.paymentMethod === 'Credit Card' && (
                         <div>
