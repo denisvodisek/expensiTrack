@@ -60,7 +60,7 @@ const AppContent: React.FC = () => {
     return (
         <div className="fixed inset-0 w-full h-[100dvh] bg-background text-foreground flex flex-col hide-scrollbar" style={{ height: '100dvh', maxHeight: '100dvh' }}>
             <InstallBanner />
-            <main className="flex-1 overflow-y-auto hide-scrollbar" style={{ paddingBottom: 'calc(4rem + env(safe-area-inset-bottom, 0px) + env(safe-area-inset-bottom, 0px))' }}>
+            <main className="flex-1 overflow-y-auto hide-scrollbar" style={{ paddingBottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))' }}>
                {memoizedView}
             </main>
             

@@ -2,12 +2,11 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
-const USERNAME = process.env.NEXT_PUBLIC_USERNAME || 'admin';
-const PASSWORD = process.env.NEXT_PUBLIC_PASSWORD || 'password';
+const PIN = '1379';
 
 interface AuthContextType {
     isAuthenticated: boolean;
-    login: (user: string, pass: string) => boolean;
+    login: (pin: string) => boolean;
     logout: () => void;
 }
 
@@ -24,8 +23,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     }, []);
 
-    const login = (user: string, pass: string): boolean => {
-        if (user === USERNAME && pass === PASSWORD) {
+    const login = (pin: string): boolean => {
+        if (pin === PIN) {
             sessionStorage.setItem('is-authenticated', 'true');
             setIsAuthenticated(true);
             return true;
