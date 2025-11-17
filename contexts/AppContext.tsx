@@ -183,7 +183,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     };
 
-    const addCategory = async (categoryData: Omit<Category, 'id'>) => {
+    const addCategory = async (categoryData: Omit<Category, 'id' | 'order'>) => {
         const newCategory = await api.addCategory(categoryData);
         setCategories(prev => [...prev, newCategory]);
     };

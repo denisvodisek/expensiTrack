@@ -145,31 +145,34 @@ const CategoryEditorModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
 
                     {/* Add Category Modal */}
                     {showAddModal && (
-                        <CategoryModal
-                            onClose={() => setShowAddModal(false)}
-                            onSave={async (categoryData) => {
-                                await addCategory(categoryData);
-                                setShowAddModal(false);
-                            }}
-                        />
-                    )}
+                <CategoryModal
+                    onClose={() => setShowAddModal(false)}
+                    onSave={async (categoryData) => {
+                        await addCategory(categoryData);
+                        setShowAddModal(false);
+                    }}
+                />
+            )}
 
-                    {/* Edit Category Modal */}
-                    {showEditModal && editingCategory && (
-                        <CategoryModal
-                            category={editingCategory}
-                            onClose={() => {
-                                setShowEditModal(false);
-                                setEditingCategory(null);
-                            }}
-                            onSave={async (categoryData) => {
-                                if (editingCategory) {
-                                    await updateCategory({ ...editingCategory, ...categoryData });
-                                }
-                                setShowEditModal(false);
-                                setEditingCategory(null);
-                            }}
-                        />
+            {/* Edit Category Modal */}
+            {showEditModal && editingCategory && (
+                <CategoryModal
+                    category={editingCategory}
+                    onClose={() => {
+                        setShowEditModal(false);
+                        setEditingCategory(null);
+                    }}
+                    onSave={async (categoryData) => {
+                        if (editingCategory) {
+                            // For updates, include the existing order
+                            await updateCategory({ ...editingCategory, ...categoryData, order: editingCategory.order });
+                        } else {
+                            await addCategory(categoryData);
+                        }
+                        setShowEditModal(false);
+                        setEditingCategory(null);
+                    }}
+                />
                     )}
                 </div>
             </div>
@@ -181,7 +184,7 @@ const CategoryEditorModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
 interface CategoryModalProps {
     category?: Category | null;
     onClose: () => void;
-    onSave: (category: Omit<Category, 'id'>) => void;
+    onSave: (category: Omit<Category, 'id' | 'order'>) => void;
 }
 
 const CategoryModal: React.FC<CategoryModalProps> = ({ category, onClose, onSave }) => {

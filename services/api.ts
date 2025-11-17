@@ -63,11 +63,29 @@ export const deleteTransaction = async (id: string): Promise<void> => {
 // Categories
 export const getCategories = async (): Promise<Category[]> => {
     await delay(SIMULATED_DELAY);
-    const categories = get<Category[]>('categories', []);
+    let categories = get<Category[]>('categories', []);
     if (categories.length === 0) {
         set('categories', defaultCategories);
         return defaultCategories;
     }
+
+    // Ensure all categories have order values (migration for existing data)
+    let needsUpdate = false;
+    categories = categories.map((category, index) => {
+        if (category.order === undefined || category.order === null) {
+            needsUpdate = true;
+            // Assign order based on type and current position
+            const typeCategories = categories.filter(c => c.type === category.type);
+            const typeIndex = typeCategories.findIndex(c => c.id === category.id);
+            return { ...category, order: typeIndex + 1 };
+        }
+        return category;
+    });
+
+    if (needsUpdate) {
+        set('categories', categories);
+    }
+
     return categories;
 };
 
