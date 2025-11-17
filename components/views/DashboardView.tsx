@@ -6,6 +6,64 @@ import PrivacyWrapper from '@/components/PrivacyWrapper';
 import { PrivacyOnIcon, PrivacyOffIcon, CreditCardIcon } from '@/components/Icons';
 import { formatCurrency } from '@/lib/currency';
 
+// Animated background component
+const AnimatedBackground: React.FC = () => {
+    return (
+        <div className="fixed top-0 left-0 right-0 h-[40vh] -z-10 overflow-hidden">
+            {/* Diagonal gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-pink-600/10" />
+
+            {/* Animated gradient waves */}
+            <div className="absolute inset-0 opacity-30">
+                <div
+                    className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-blue-400/20 to-transparent animate-pulse"
+                    style={{
+                        background: 'linear-gradient(45deg, transparent, rgba(59, 130, 246, 0.1), transparent)',
+                        animation: 'waveMove 8s ease-in-out infinite'
+                    }}
+                />
+                <div
+                    className="absolute top-1/3 left-0 w-full h-full bg-gradient-to-r from-transparent via-purple-400/20 to-transparent animate-pulse"
+                    style={{
+                        background: 'linear-gradient(-45deg, transparent, rgba(147, 51, 234, 0.1), transparent)',
+                        animation: 'waveMove 12s ease-in-out infinite reverse'
+                    }}
+                />
+                <div
+                    className="absolute top-2/3 left-0 w-full h-full bg-gradient-to-r from-transparent via-pink-400/20 to-transparent animate-pulse"
+                    style={{
+                        background: 'linear-gradient(45deg, transparent, rgba(236, 72, 153, 0.1), transparent)',
+                        animation: 'waveMove 10s ease-in-out infinite'
+                    }}
+                />
+            </div>
+
+            {/* Floating gradient orbs */}
+            <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-full blur-3xl animate-bounce"
+                 style={{ animation: 'float 15s ease-in-out infinite' }} />
+            <div className="absolute bottom-32 left-16 w-48 h-48 bg-gradient-to-br from-purple-500/5 to-pink-500/5 rounded-full blur-3xl animate-bounce"
+                 style={{ animation: 'float 20s ease-in-out infinite reverse' }} />
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-br from-pink-500/5 to-blue-500/5 rounded-full blur-2xl animate-pulse"
+                 style={{ animation: 'float 18s ease-in-out infinite' }} />
+
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                    @keyframes waveMove {
+                        0%, 100% { transform: translateX(-100vw) scaleY(0.5); opacity: 0; }
+                        50% { transform: translateX(0vw) scaleY(1); opacity: 0.6; }
+                    }
+                    @keyframes float {
+                        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+                        25% { transform: translate(20px, -20px) rotate(90deg); }
+                        50% { transform: translate(-10px, 10px) rotate(180deg); }
+                        75% { transform: translate(10px, -10px) rotate(270deg); }
+                    }
+                `
+            }} />
+        </div>
+    );
+};
+
 const currencyFormatter = new Intl.NumberFormat('en-HK', { style: 'currency', currency: 'HKD' });
 const PIE_COLORS = ['#16a34a', '#3b82f6', '#f97316', '#ef4444', '#8b5cf6', '#ec4899', '#fde047', '#22d3ee'];
 
@@ -138,7 +196,9 @@ const DashboardView: React.FC = () => {
         .sort((a, b) => a.day - b.day);
 
     return (
-        <div className="p-4 space-y-6">
+        <>
+            <AnimatedBackground />
+            <div className="relative z-10 p-4 space-y-6">
             <header className="flex justify-between items-center">
                 <div className="flex-1 min-w-0">
                     <h1 className="text-xl sm:text-2xl font-bold font-display truncate">Hello, {settings.userName}</h1>
@@ -374,8 +434,8 @@ const DashboardView: React.FC = () => {
                     )}
                 </div>
             </div>
-
-        </div>
+            </div>
+        </>
     );
 };
 
