@@ -307,7 +307,7 @@ const ProfileView: React.FC = () => {
                     <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-4">
                         <button
                             onClick={() => setShowCategoryEditor(true)}
-                            className="w-full flex items-center justify-between p-4 group"
+                            className="w-full flex items-center justify-between p-2 group"
                         >
                             <div className="flex items-center gap-3">
                                 <div className="text-left">
