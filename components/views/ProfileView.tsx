@@ -209,8 +209,8 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ category, onClose, onSave
 
     return (
         <>
-            <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-2">
-                <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-6 w-full max-w-md relative">
+            <div className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-center justify-center z-50 p-2">
+                <div className="bg-card backdrop-blur-sm border border-border rounded-lg p-6 w-full max-w-md relative">
                     <button type="button" onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
                         <CloseIcon className="w-6 h-6" />
                     </button>
