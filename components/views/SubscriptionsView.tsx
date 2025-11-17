@@ -212,19 +212,19 @@ interface SubscriptionModalProps {
 }
 
 const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ subscription, onClose, onSave }) => {
+    const { cards, categories } = useAppContext();
+
     const [formData, setFormData] = useState({
         name: subscription?.name || '',
         amount: subscription?.amount?.toString() || '',
         frequency: subscription?.frequency || 'monthly' as Subscription['frequency'],
-        category: subscription?.category || 'Entertainment' as Subscription['category'],
+        category: subscription?.category || categories[0]?.name || 'Food',
         paymentMethod: subscription?.paymentMethod || 'Credit Card' as Subscription['paymentMethod'],
         cardId: subscription?.cardId || '',
         startDate: subscription?.startDate || new Date().toISOString().split('T')[0],
         active: subscription?.active ?? true,
         notes: subscription?.notes || ''
     });
-
-    const { cards } = useAppContext();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -238,17 +238,18 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ subscription, onC
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md relative max-h-[90vh] overflow-y-auto hide-scrollbar">
-                <button type="button" onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
-                    <CloseIcon className="w-6 h-6" />
-                </button>
+        <>
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2">
+                <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md relative flex flex-col space-y-4 max-h-[90vh] overflow-y-auto hide-scrollbar">
+                    <button type="button" onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
+                        <CloseIcon className="w-6 h-6" />
+                    </button>
 
-                <h2 className="text-xl font-bold text-center text-foreground font-display mb-6">
-                    {subscription ? 'Edit Subscription' : 'Add Subscription'}
-                </h2>
+                    <h2 className="text-xl font-bold text-center text-foreground font-display">
+                        {subscription ? 'Edit Subscription' : 'Add Subscription'}
+                    </h2>
 
-                <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+                    <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
                     <div>
                         <label className="block text-sm font-semibold text-muted-foreground mb-1">Name</label>
                         <input
@@ -261,64 +262,69 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ subscription, onC
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-semibold text-muted-foreground mb-1">Amount</label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                value={formData.amount}
-                                onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
-                                placeholder="0.00"
-                                required
-                                className="w-full bg-secondary border border-border rounded-md px-3 py-2 text-foreground"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-muted-foreground mb-1">Frequency</label>
-                            <select
-                                value={formData.frequency}
-                                onChange={(e) => setFormData(prev => ({ ...prev, frequency: e.target.value as Subscription['frequency'] }))}
-                                className="w-full bg-secondary border border-border rounded-md px-3 py-2 text-foreground"
-                            >
-                                <option value="monthly">Monthly</option>
-                                <option value="quarterly">Quarterly</option>
-                                <option value="semi-annually">Semi-Annually</option>
-                                <option value="annually">Annually</option>
-                            </select>
-                        </div>
+                    <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base sm:text-lg text-muted-foreground">HKD</span>
+                        <input
+                            type="number"
+                            step="0.01"
+                            value={formData.amount}
+                            onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
+                            placeholder="0.00"
+                            required
+                            className="w-full bg-secondary border border-border rounded-md text-2xl sm:text-3xl font-bold text-right p-3 pr-4 pl-14 sm:pl-16 text-foreground focus:ring-1 focus:ring-ring font-numbers"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 p-1 bg-secondary rounded-md">
+                        <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, frequency: 'monthly' }))}
+                            className={`w-full py-1.5 rounded text-sm font-semibold ${formData.frequency === 'monthly' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
+                        >
+                            Monthly
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, frequency: 'annually' }))}
+                            className={`w-full py-1.5 rounded text-sm font-semibold ${formData.frequency === 'annually' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
+                        >
+                            Annually
+                        </button>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-semibold text-muted-foreground mb-1">Category</label>
-                        <select
-                            value={formData.category}
-                            onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as Subscription['category'] }))}
-                            className="w-full bg-secondary border border-border rounded-md px-3 py-2 text-foreground"
-                        >
-                            <option value="Entertainment">Entertainment</option>
-                            <option value="Software">Software</option>
-                            <option value="Health">Health</option>
-                            <option value="Productivity">Productivity</option>
-                            <option value="News">News</option>
-                            <option value="Other">Other</option>
-                        </select>
+                        <h3 className="text-sm font-semibold text-muted-foreground mb-2">Category</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {categories.map(cat => (
+                                <button
+                                    type="button"
+                                    key={cat.id}
+                                    onClick={() => setFormData(prev => ({ ...prev, category: cat.name }))}
+                                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${formData.category === cat.name ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}
+                                >
+                                    {cat.emoji} {cat.name}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-semibold text-muted-foreground mb-1">Payment Method</label>
-                        <select
-                            value={formData.paymentMethod}
-                            onChange={(e) => setFormData(prev => ({ ...prev, paymentMethod: e.target.value as Subscription['paymentMethod'] }))}
-                            className="w-full bg-secondary border border-border rounded-md px-3 py-2 text-foreground"
-                        >
-                            <option value="Cash">Cash</option>
-                            <option value="Credit Card">Credit Card</option>
-                            <option value="PayMe">PayMe</option>
-                            <option value="Octopus">Octopus</option>
-                            <option value="Bank">Bank</option>
-                        </select>
-                    </div>
+                    {subscription?.type !== 'income' && (
+                        <div>
+                            <h3 className="text-sm font-semibold text-muted-foreground mb-2">Payment Method</h3>
+                            <div className="grid grid-cols-3 gap-2">
+                                {['Cash', 'Credit Card', 'PayMe', 'Octopus', 'Bank'].map(method => (
+                                    <button
+                                        type="button"
+                                        key={method}
+                                        onClick={() => setFormData(prev => ({ ...prev, paymentMethod: method as Subscription['paymentMethod'] }))}
+                                        className={`py-2 rounded-md text-xs font-semibold transition ${formData.paymentMethod === method ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}
+                                    >
+                                        {method}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {formData.paymentMethod === 'Credit Card' && (
                         <div>
@@ -370,15 +376,16 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ subscription, onC
 
                     <div className="flex gap-2 pt-4">
                         <button type="submit" className="flex-1 bg-primary text-primary-foreground font-bold py-2 rounded-md hover:opacity-90 transition-opacity">
-                            {subscription ? 'Update' : 'Add'} Subscription
+                            {subscription ? 'Update Subscription' : 'Add Subscription'}
                         </button>
                         <button type="button" onClick={onClose} className="flex-1 bg-secondary text-foreground font-bold py-2 rounded-md hover:opacity-90 transition-opacity">
                             Cancel
                         </button>
                     </div>
                 </form>
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 

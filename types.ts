@@ -44,7 +44,7 @@ export interface Subscription {
     name: string;
     amount: number;
     frequency: 'monthly' | 'quarterly' | 'semi-annually' | 'annually';
-    category: 'Entertainment' | 'Software' | 'Health' | 'Productivity' | 'News' | 'Other';
+    category: string;
     paymentMethod: 'Cash' | 'Credit Card' | 'PayMe' | 'Octopus' | 'Bank';
     cardId?: string;
     startDate: string;
