@@ -125,14 +125,14 @@ const TransactionsView: React.FC<TransactionsViewProps> = ({ onEditTransaction }
             
             <div className="space-y-3">
                 <div className="flex space-x-2 bg-secondary p-1 rounded-md">
-                    <FilterButton label="This Month" period="month" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
-                    <FilterButton label="Last Month" period="last-month" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
-                    <FilterButton label="3 Months Ago" period="quarter" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
+                    <FilterButton label="This Mnth" period="month" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
+                    <FilterButton label="Last Mnth" period="last-month" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
+                    <FilterButton label="Last 3 Mths" period="quarter" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
                     <FilterButton label="Custom" period="custom" activePeriod={filterPeriod} setPeriod={setFilterPeriod} />
                 </div>
 
                 {filterPeriod === 'custom' && (
-                    <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 rounded-lg space-y-3">
+                    <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-3 rounded-lg space-y-3">
                         <div className="flex items-center justify-between">
                             <p className="text-sm font-semibold">Custom Date Range</p>
                             <button
@@ -260,7 +260,7 @@ const ChartsView: React.FC<{transactions: Transaction[]}> = ({ transactions }) =
                 <StatCard title="Net Flow" amount={flow} color={flow >= 0 ? 'text-green-500' : 'text-red-500'} />
             </div>
             <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-4 rounded-lg">
+                <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-4 rounded-lg">
                     <h2 className="text-lg font-semibold font-display mb-2">Category Breakdown</h2>
                     {pieChartData.length > 0 ? (
                         <>
@@ -309,7 +309,7 @@ const ChartsView: React.FC<{transactions: Transaction[]}> = ({ transactions }) =
                         </div>
                     )}
                 </div>
-                <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-4 rounded-lg">
+                <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-4 rounded-lg">
                     <h2 className="text-lg font-semibold font-display mb-2">Daily Flow</h2>
                     <div className="h-48">
                         <ResponsiveContainer width="100%" height="100%">
@@ -345,7 +345,7 @@ const ChartsView: React.FC<{transactions: Transaction[]}> = ({ transactions }) =
 const StatCard: React.FC<{title: string; amount: number; color?: string}> = ({ title, amount, color }) => {
     const formatted = formatCurrency(amount);
     return (
-        <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-2 sm:p-3 rounded-lg col-span-1 text-center">
+        <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-2 sm:p-3 rounded-lg col-span-1 text-center">
             <h3 className="text-xs font-medium text-muted-foreground truncate">{title}</h3>
             <PrivacyWrapper>
                 <p className={`text-base sm:text-lg md:text-xl font-bold font-numbers break-words ${color || 'text-foreground'}`}>{formatted.display}</p>

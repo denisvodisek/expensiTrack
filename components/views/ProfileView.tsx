@@ -42,7 +42,7 @@ const CategoryEditorModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
     return (
         <>
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-start z-50 p-4">
-                <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg w-full max-w-md mx-auto max-h-[90vh] overflow-hidden flex flex-col">
+                <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg w-full max-w-md mx-auto max-h-[90vh] overflow-hidden flex flex-col">
                     {/* Header */}
                     <div className="flex items-center justify-between p-4 border-b border-border">
                         <h2 className="text-lg sm:text-xl font-bold font-display">Category Editor</h2>
@@ -208,7 +208,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ category, onClose, onSave
     return (
         <>
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2">
-                <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg p-6 w-full max-w-md relative">
+                <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-6 w-full max-w-md relative">
                     <button type="button" onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
                         <CloseIcon className="w-6 h-6" />
                     </button>
@@ -300,7 +300,7 @@ const ProfileView: React.FC = () => {
                 <SettingsSection />
 {/* Category Editor Button */}
 <section className="space-y-4">
-                    <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg p-4">
+                    <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-4">
                         <button
                             onClick={() => setShowCategoryEditor(true)}
                             className="w-full flex items-center justify-between p-4 group"
@@ -361,7 +361,7 @@ const NetWorthSection: React.FC = () => {
     return (
         <section className="space-y-3 sm:space-y-4">
             <h2 className="text-lg sm:text-xl font-semibold font-display">Net Worth</h2>
-            <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-4 sm:p-6 rounded-lg text-center">
+            <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-4 sm:p-6 rounded-lg text-center">
                 <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Total Net Worth</h3>
                 <PrivacyWrapper>
                     <p className="text-2xl sm:text-3xl md:text-4xl font-bold mt-1 tracking-tight font-numbers break-words">{formatCurrency(netWorth).display}</p>
@@ -369,14 +369,14 @@ const NetWorthSection: React.FC = () => {
                 </PrivacyWrapper>
             </div>
              <div className="grid grid-cols-2 gap-2 sm:gap-4 text-center">
-                <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
+                <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
                     <h3 className="text-xs sm:text-sm text-green-400 font-semibold">Total Assets</h3>
                     <PrivacyWrapper>
                         <p className="text-sm sm:text-base md:text-lg font-bold font-numbers break-words">{formatCurrency(settings.totalSavings + totalAssetsValue).display}</p>
                         <p className="text-[10px] opacity-70 font-numbers">{formatCurrency(settings.totalSavings + totalAssetsValue).exact}</p>
                     </PrivacyWrapper>
                 </div>
-                 <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
+                 <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
                     <h3 className="text-xs sm:text-sm text-red-400 font-semibold">Total Liabilities</h3>
                     <PrivacyWrapper>
                         <p className="text-sm sm:text-base md:text-lg font-bold font-numbers break-words">{formatCurrency(totalLiabilities).display}</p>
@@ -385,7 +385,7 @@ const NetWorthSection: React.FC = () => {
                 </div>
             </div>
             
-            <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-4 rounded-lg space-y-2">
+            <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-4 rounded-lg space-y-2">
                 <label className="block text-sm font-medium text-muted-foreground">Total Savings (Liquid Cash)</label>
                 <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
@@ -410,7 +410,7 @@ const NetWorthSection: React.FC = () => {
                     </form>
                 )}
                 {assets.map(asset => (
-                    <div key={asset.id} className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 rounded-lg flex justify-between items-center">
+                    <div key={asset.id} className="bg-card/50 backdrop-blur-sm border border-border/50 p-3 rounded-lg flex justify-between items-center">
                        <div>
                             <p className="font-semibold">{asset.name}</p>
                             {/* FIX: Corrected typo from toLocaleDateDateString to toLocaleDateString */}
@@ -522,7 +522,7 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
     }, [goal, settings.totalSavings, settings.monthlyIncome, totalFundable, totalAssetsValue]);
 
     return (
-        <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-4 rounded-lg space-y-3">
+        <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-4 rounded-lg space-y-3">
             <div className="flex justify-between items-start">
                 <div>
                     <h3 className="font-bold">{goal.name}</h3>
@@ -640,7 +640,7 @@ const GoalsSection: React.FC = () => {
                  <button onClick={() => setShowAddForm(!showAddForm)} className="text-sm font-semibold text-primary">{showAddForm ? 'Cancel' : '+ New Goal'}</button>
             </div>
              {showAddForm && (
-                <form onSubmit={handleSubmit} className="bg-card/80 backdrop-blur-sm border border-border/50 p-4 rounded-lg space-y-3">
+                <form onSubmit={handleSubmit} className="bg-card/50 backdrop-blur-sm border border-border/50 p-4 rounded-lg space-y-3">
                     <input type="text" placeholder="Goal Name (e.g., New Laptop)" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-input p-2 rounded-md"/>
                     <input type="number" placeholder="Target Amount (HKD)" value={targetAmount} onChange={e => setTargetAmount(e.target.value)} required className="w-full bg-input p-2 rounded-md font-numbers text-sm sm:text-base"/>
                     <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} required className="w-full bg-input p-2 rounded-md"/>
@@ -699,7 +699,7 @@ const CardsSection: React.FC = () => {
                  <button onClick={() => setShowAddForm(!showAddForm)} className="text-xs sm:text-sm font-semibold text-primary whitespace-nowrap">{showAddForm ? 'Cancel' : '+ New Card'}</button>
             </div>
             {showAddForm && (
-                <form onSubmit={handleSubmit} className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg space-y-2">
+                <form onSubmit={handleSubmit} className="bg-card/50 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg space-y-2">
                     <input type="text" placeholder="Card Name" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-input p-2 rounded-md text-sm"/>
                     <div className="flex gap-2">
                         <input type="number" placeholder="Limit (HKD)" value={limit} onChange={e => setLimit(e.target.value)} required className="flex-1 bg-input p-2 rounded-md font-numbers text-xs sm:text-sm min-w-0"/>
@@ -711,7 +711,7 @@ const CardsSection: React.FC = () => {
              {activeCards.map(card => {
                     const utilization = card.limit > 0 ? (card.balance / card.limit) * 100 : 0;
                     return (
-                        <div key={card.id} className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg space-y-2">
+                        <div key={card.id} className="bg-card/50 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg space-y-2">
                             <div className="flex justify-between items-start">
                                 <h3 className="font-bold text-sm sm:text-base">{card.name}</h3>
                                 <button onClick={() => archiveCard(card.id)} className="text-xs text-destructive">Archive</button>
@@ -827,7 +827,7 @@ const SettingsSection: React.FC = () => {
         <section className="space-y-4">
             <h2 className="text-xl font-semibold mb-4 font-display">General Settings</h2>
             
-            <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-4 rounded-lg flex justify-between items-center">
+            <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-4 rounded-lg flex justify-between items-center">
                 <label className="font-medium text-sm">Appearance</label>
                 <div className="flex items-center gap-2 p-1 bg-secondary rounded-md">
                     <button onClick={toggleTheme} disabled={settings.theme === 'light'} className={`px-2 py-1 rounded-sm text-muted-foreground disabled:text-foreground disabled:bg-background`}>
@@ -839,7 +839,7 @@ const SettingsSection: React.FC = () => {
                 </div>
             </div>
 
-            <form onSubmit={handleUpdateIncome} className="bg-card/80 backdrop-blur-sm border border-border/50 p-4 rounded-lg space-y-2">
+            <form onSubmit={handleUpdateIncome} className="bg-card/50 backdrop-blur-sm border border-border/50 p-4 rounded-lg space-y-2">
                 <label htmlFor="income" className="block text-sm font-medium text-muted-foreground">Monthly Income (for goal projections)</label>
                 <div className="flex gap-2">
                     <input id="income" type="number" placeholder="e.g., 30000" value={monthlyIncome} onChange={e => setMonthlyIncome(e.target.value)} className={`flex-1 bg-input p-2 rounded-md font-numbers text-sm sm:text-base ${settings.privacyMode ? 'blur' : ''}`}/>
@@ -849,7 +849,7 @@ const SettingsSection: React.FC = () => {
                 </div>
             </form>
 
-            <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-4 rounded-lg space-y-2">
+            <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-4 rounded-lg space-y-2">
                 <div className="space-y-2">
                     <button 
                         onClick={downloadDataAsJson} 

@@ -184,7 +184,7 @@ const DashboardView: React.FC = () => {
     return (
         <>
             <AnimatedBackground />
-            <div className="relative z-10 p-4 space-y-6">
+            <div className="relative z-10 p-3 sm:p-4 space-y-6 sm:space-y-8">
             <header className="flex justify-between items-center">
                 <div className="flex-1 min-w-0">
                     <h1 className="text-xl sm:text-2xl font-bold font-display truncate">Hello, {settings.userName}</h1>
@@ -203,7 +203,7 @@ const DashboardView: React.FC = () => {
 
             {/* Monthly Savings Progress */}
             {monthlySavingsProgress && (
-                <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
+                <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                         <h3 className="text-sm sm:text-base font-semibold font-display">Monthly Savings Goal</h3>
                         <div className="text-right">
@@ -238,7 +238,7 @@ const DashboardView: React.FC = () => {
                 </div>
             )}
 
-             <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
+             <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
                 <h2 className="text-base sm:text-lg font-semibold font-display mb-4">Daily Flow (This Month)</h2>
                 {barChartData.length === 0 ? (
                     <div className="h-64 sm:h-80 flex items-center justify-center text-muted-foreground">
@@ -308,7 +308,7 @@ const DashboardView: React.FC = () => {
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
+                <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
                     <h2 className="text-base sm:text-lg font-semibold font-display mb-2">Category Breakdown</h2>
                     {pieChartData.length > 0 ? (
                         <>
@@ -356,7 +356,7 @@ const DashboardView: React.FC = () => {
                     )}
                 </div>
 
-                <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg space-y-3">
+                <div className="bg-card/50 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg space-y-3">
                     <h2 className="text-base sm:text-lg font-semibold font-display">Credit Cards</h2>
                     {activeCards.length > 0 ? activeCards.map(card => {
                         const utilization = card.limit > 0 ? (card.balance / card.limit) * 100 : 0;
@@ -428,7 +428,7 @@ const DashboardView: React.FC = () => {
 const StatCard: React.FC<{title: string; amount: number; color?: string; className?: string}> = ({ title, amount, color, className = '' }) => {
     const formatted = formatCurrency(amount);
     return (
-        <div className={`bg-card/80 backdrop-blur-sm border border-border/50 p-2 sm:p-4 rounded-lg col-span-1 ${className}`}>
+        <div className={`bg-card/50 backdrop-blur-sm border border-border/50 p-2 sm:p-4 rounded-lg col-span-1 ${className}`}>
             <h3 className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{title}</h3>
             <PrivacyWrapper>
                 <p className={`text-lg sm:text-xl md:text-2xl font-bold mt-1 font-numbers break-words ${color || 'text-foreground'}`}>{formatted.display}</p>
