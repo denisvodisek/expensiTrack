@@ -76,11 +76,11 @@ const SubscriptionsView: React.FC = () => {
 
             {/* Statistics Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
+                <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
                     <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Total Active</h3>
                     <p className="text-lg sm:text-xl font-bold font-numbers">{stats.totalSubscriptions}</p>
                 </div>
-                <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
+                <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
                     <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Monthly Total</h3>
                     <p className="text-lg sm:text-xl font-bold font-numbers text-green-500">
                         {formatCurrency(stats.monthlyTotal).display}
@@ -89,7 +89,7 @@ const SubscriptionsView: React.FC = () => {
                         {formatCurrency(stats.monthlyTotal).exact}
                     </p>
                 </div>
-                <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
+                <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
                     <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Annual Total</h3>
                     <p className="text-lg sm:text-xl font-bold font-numbers text-blue-500">
                         {formatCurrency(stats.annualTotal).display}
@@ -98,7 +98,7 @@ const SubscriptionsView: React.FC = () => {
                         {formatCurrency(stats.annualTotal).exact}
                     </p>
                 </div>
-                <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
+                <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
                     <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Avg Monthly</h3>
                     <p className="text-lg sm:text-xl font-bold font-numbers text-purple-500">
                         {formatCurrency(stats.totalMonthly).display}
@@ -120,7 +120,7 @@ const SubscriptionsView: React.FC = () => {
                     subscriptions.map(subscription => (
                         <div
                             key={subscription.id}
-                            className={`bg-card border border-border p-4 rounded-lg ${!subscription.active ? 'opacity-60' : ''}`}
+                            className={`bg-card/80 backdrop-blur-sm border border-border/50 p-4 rounded-lg ${!subscription.active ? 'opacity-60' : ''}`}
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
@@ -233,7 +233,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ subscription, onC
     return (
         <>
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2">
-                <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md relative flex flex-col space-y-4 max-h-[90vh] overflow-y-auto hide-scrollbar">
+                <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg p-6 w-full max-w-md relative flex flex-col space-y-4 max-h-[90vh] overflow-y-auto hide-scrollbar">
                     <button type="button" onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
                         <CloseIcon className="w-6 h-6" />
                     </button>

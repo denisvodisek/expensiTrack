@@ -28,8 +28,7 @@ const AnimatedBackground: React.FC = () => {
                 <path
                     fill="url(#waveGradient)"
                     d="M0,160L80,138.7C160,117,320,75,480,64C640,53,800,75,960,69.3C1120,64,1280,32,1360,16L1440,0L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
-                    className="animate-pulse"
-                    style={{ animation: 'waveFlow 8s ease-in-out infinite' }}
+                    style={{ animation: 'waveFlow 12s ease-in-out infinite, waveDrift 20s ease-in-out infinite' }}
                 />
             </svg>
 
@@ -37,7 +36,13 @@ const AnimatedBackground: React.FC = () => {
                 __html: `
                     @keyframes waveFlow {
                         0%, 100% { transform: translateY(0px) scale(1); }
-                        50% { transform: translateY(-5px) scale(1.02); }
+                        50% { transform: translateY(-8px) scale(1.03); }
+                    }
+                    @keyframes waveDrift {
+                        0%, 100% { transform: translateX(0px) rotate(0deg); }
+                        25% { transform: translateX(10px) rotate(0.5deg); }
+                        50% { transform: translateX(-5px) rotate(-0.3deg); }
+                        75% { transform: translateX(8px) rotate(0.2deg); }
                     }
                 `
             }} />
@@ -198,7 +203,7 @@ const DashboardView: React.FC = () => {
 
             {/* Monthly Savings Progress */}
             {monthlySavingsProgress && (
-                <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
+                <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                         <h3 className="text-sm sm:text-base font-semibold font-display">Monthly Savings Goal</h3>
                         <div className="text-right">
@@ -233,7 +238,7 @@ const DashboardView: React.FC = () => {
                 </div>
             )}
 
-             <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
+             <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
                 <h2 className="text-base sm:text-lg font-semibold font-display mb-4">Daily Flow (This Month)</h2>
                 {barChartData.length === 0 ? (
                     <div className="h-64 sm:h-80 flex items-center justify-center text-muted-foreground">
@@ -303,7 +308,7 @@ const DashboardView: React.FC = () => {
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-card border border-border p-3 sm:p-4 rounded-lg">
+                <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg">
                     <h2 className="text-base sm:text-lg font-semibold font-display mb-2">Category Breakdown</h2>
                     {pieChartData.length > 0 ? (
                         <>
@@ -351,7 +356,7 @@ const DashboardView: React.FC = () => {
                     )}
                 </div>
 
-                <div className="bg-card border border-border p-3 sm:p-4 rounded-lg space-y-3">
+                <div className="bg-card/80 backdrop-blur-sm border border-border/50 p-3 sm:p-4 rounded-lg space-y-3">
                     <h2 className="text-base sm:text-lg font-semibold font-display">Credit Cards</h2>
                     {activeCards.length > 0 ? activeCards.map(card => {
                         const utilization = card.limit > 0 ? (card.balance / card.limit) * 100 : 0;
@@ -423,7 +428,7 @@ const DashboardView: React.FC = () => {
 const StatCard: React.FC<{title: string; amount: number; color?: string; className?: string}> = ({ title, amount, color, className = '' }) => {
     const formatted = formatCurrency(amount);
     return (
-        <div className={`bg-card border border-border p-2 sm:p-4 rounded-lg col-span-1 ${className}`}>
+        <div className={`bg-card/80 backdrop-blur-sm border border-border/50 p-2 sm:p-4 rounded-lg col-span-1 ${className}`}>
             <h3 className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{title}</h3>
             <PrivacyWrapper>
                 <p className={`text-lg sm:text-xl md:text-2xl font-bold mt-1 font-numbers break-words ${color || 'text-foreground'}`}>{formatted.display}</p>
