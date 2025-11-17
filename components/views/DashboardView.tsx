@@ -5,50 +5,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
 import PrivacyWrapper from '@/components/PrivacyWrapper';
 import { PrivacyOnIcon, PrivacyOffIcon, CreditCardIcon } from '@/components/Icons';
 import { formatCurrency } from '@/lib/currency';
+import AnimatedBackground from '@/components/AnimatedBackground';
 
-// Animated background component
-const AnimatedBackground: React.FC = () => {
-    return (
-        <div className="fixed top-0 left-0 right-0 h-[40vh] -z-10 overflow-hidden">
-            {/* SVG Wave Background */}
-            <svg
-                className="absolute inset-0 w-full h-full"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 1440 320"
-                preserveAspectRatio="none"
-                style={{ transform: 'rotate(180deg)' }}
-            >
-                <defs>
-                    <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity="0.08" />
-                        <stop offset="50%" stopColor="rgb(147, 51, 234)" stopOpacity="0.12" />
-                        <stop offset="100%" stopColor="rgb(236, 72, 153)" stopOpacity="0.06" />
-                    </linearGradient>
-                </defs>
-                <path
-                    fill="url(#waveGradient)"
-                    d="M0,160L80,138.7C160,117,320,75,480,64C640,53,800,75,960,69.3C1120,64,1280,32,1360,16L1440,0L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
-                    style={{ animation: 'waveFlow 12s ease-in-out infinite, waveDrift 20s ease-in-out infinite' }}
-                />
-            </svg>
-
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                    @keyframes waveFlow {
-                        0%, 100% { transform: translateY(0px) scale(1); }
-                        50% { transform: translateY(-8px) scale(1.03); }
-                    }
-                    @keyframes waveDrift {
-                        0%, 100% { transform: translateX(0px) rotate(0deg); }
-                        25% { transform: translateX(10px) rotate(0.5deg); }
-                        50% { transform: translateX(-5px) rotate(-0.3deg); }
-                        75% { transform: translateX(8px) rotate(0.2deg); }
-                    }
-                `
-            }} />
-        </div>
-    );
-};
 
 const currencyFormatter = new Intl.NumberFormat('en-HK', { style: 'currency', currency: 'HKD' });
 const PIE_COLORS = ['#16a34a', '#3b82f6', '#f97316', '#ef4444', '#8b5cf6', '#ec4899', '#fde047', '#22d3ee'];
@@ -183,7 +141,7 @@ const DashboardView: React.FC = () => {
 
     return (
         <>
-            <AnimatedBackground />
+            <AnimatedBackground page="dashboard" />
             <div className="relative z-10 p-3 sm:p-4 space-y-6 sm:space-y-8">
             <header className="flex justify-between items-center">
                 <div className="flex-1 min-w-0">

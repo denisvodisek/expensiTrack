@@ -5,6 +5,9 @@ import { EditIcon, DeleteIcon } from '@/components/Icons';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
 import PrivacyWrapper from '@/components/PrivacyWrapper';
 import { formatCurrency } from '@/lib/currency';
+import AnimatedBackground from '@/components/AnimatedBackground';
+
+
 
 const currencyFormatter = new Intl.NumberFormat('en-HK', { style: 'currency', currency: 'HKD' });
 const PIE_COLORS = ['#16a34a', '#3b82f6', '#f97316', '#ef4444', '#8b5cf6', '#ec4899', '#fde047', '#22d3ee'];
@@ -253,7 +256,9 @@ const ChartsView: React.FC<{transactions: Transaction[]}> = ({ transactions }) =
     if (transactions.length === 0) return null;
 
     return (
-        <div className="space-y-4">
+        <>
+            <AnimatedBackground page="expenses" />
+            <div className="space-y-4">
              <div className="grid grid-cols-3 gap-2 sm:gap-4">
                 <StatCard title="Income" amount={income} color="text-green-500" />
                 <StatCard title="Expense" amount={expense} color="text-red-500" />
@@ -339,6 +344,7 @@ const ChartsView: React.FC<{transactions: Transaction[]}> = ({ transactions }) =
                 </div>
             </div>
         </div>
+        </>
     );
 };
 

@@ -3,6 +3,8 @@ import { useAppContext } from '@/contexts/AppContext';
 import { formatCurrency } from '@/lib/currency';
 import type { Subscription } from '@/types';
 import { CloseIcon } from '@/components/Icons';
+import AnimatedBackground from '@/components/AnimatedBackground';
+
 
 const SubscriptionsView: React.FC = () => {
     const { subscriptions, addSubscription, updateSubscription, deleteSubscription, categories } = useAppContext();
@@ -59,8 +61,11 @@ const SubscriptionsView: React.FC = () => {
         }
     };
 
+
     return (
-        <div className="p-3 sm:p-4 space-y-6 sm:space-y-8">
+        <>
+            <AnimatedBackground page="subscriptions" />
+            <div className="p-3 sm:p-4 space-y-6 sm:space-y-8">
             <div>
                 <h1 className="text-xl sm:text-2xl font-bold font-display">Subscriptions</h1>
                 <p className="text-sm text-muted-foreground">Track your recurring expenses</p>
@@ -195,6 +200,7 @@ const SubscriptionsView: React.FC = () => {
                 />
             )}
         </div>
+        </>
     );
 };
 
@@ -233,7 +239,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ subscription, onC
 
     return (
         <>
-            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2">
+            <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-2">
                 <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-6 w-full max-w-md relative flex flex-col space-y-4 max-h-[90vh] overflow-y-auto hide-scrollbar">
                     <button type="button" onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
                         <CloseIcon className="w-6 h-6" />

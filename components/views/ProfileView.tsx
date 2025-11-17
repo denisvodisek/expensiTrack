@@ -6,6 +6,8 @@ import PrivacyWrapper from '@/components/PrivacyWrapper';
 import { downloadDataAsJson, importDataFromFile } from '@/services/api';
 import { formatCurrency } from '@/lib/currency';
 import type { Category } from '@/types';
+import AnimatedBackground from '@/components/AnimatedBackground';
+
 
 const currencyFormatter = new Intl.NumberFormat('en-HK', { style: 'currency', currency: 'HKD' });
 
@@ -41,7 +43,7 @@ const CategoryEditorModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
 
     return (
         <>
-            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-start z-50 p-4">
+            <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-start z-50 p-4">
                 <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg w-full max-w-md mx-auto max-h-[90vh] overflow-hidden flex flex-col">
                     {/* Header */}
                     <div className="flex items-center justify-between p-4 border-b border-border">
@@ -207,7 +209,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ category, onClose, onSave
 
     return (
         <>
-            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2">
+            <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-2">
                 <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-6 w-full max-w-md relative">
                     <button type="button" onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
                         <CloseIcon className="w-6 h-6" />
@@ -285,8 +287,10 @@ const ProfileView: React.FC = () => {
     const [showCategoryEditor, setShowCategoryEditor] = useState(false);
 
     if (!settings) return null;
+
     return (
         <>
+            <AnimatedBackground page="profile" />
             <div className="p-3 sm:p-4 space-y-6 sm:space-y-8">
                 <header className="flex justify-between items-center">
                     <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground font-display">Profile & Settings</h1>
@@ -306,12 +310,9 @@ const ProfileView: React.FC = () => {
                             className="w-full flex items-center justify-between p-4 group"
                         >
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                                    <EditIcon className="w-5 h-5 text-primary" />
-                                </div>
                                 <div className="text-left">
                                     <h3 className="font-semibold text-foreground">Category Editor</h3>
-                                    <p className="text-sm text-muted-foreground">Customize your expense and income categories</p>
+                                    <p className="text-sm text-muted-foreground">Customize categories</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">

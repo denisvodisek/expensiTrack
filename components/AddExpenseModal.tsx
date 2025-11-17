@@ -132,7 +132,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
                 />
             )}
 
-            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2">
+            <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-2">
                 <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md relative flex flex-col space-y-4 max-h-[90vh] overflow-y-auto hide-scrollbar">
                 <button type="button" onClick={() => { onClose(); setShowConfetti(false); }} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
                     <CloseIcon className="w-6 h-6" />

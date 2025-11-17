@@ -19,7 +19,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
             <div className="bg-card border border-border rounded-lg p-6 w-full max-w-sm text-center">
                 <h2 className="text-2xl font-bold text-foreground">Welcome to ExpensiTrak!</h2>
                 <p className="text-muted-foreground mt-2 mb-4">What should we call you?</p>
