@@ -43,7 +43,7 @@ const CategoryEditorModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
 
     return (
         <>
-            <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-start z-50 p-4">
+            <div className="fixed inset-0 bg-background/70 backdrop-blur-md flex items-center justify-start z-50 p-4">
                 <div className="bg-card border border-border rounded-lg w-full max-w-md mx-auto max-h-[90vh] overflow-hidden flex flex-col">
                     {/* Header */}
                     <div className="flex items-center justify-between p-4 border-b border-border">
@@ -209,7 +209,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ category, onClose, onSave
 
     return (
         <>
-            <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-2">
+            <div className="fixed inset-0 bg-background/70 backdrop-blur-md flex items-center justify-center z-50 p-2">
                 <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md relative">
                     <button type="button" onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
                         <CloseIcon className="w-6 h-6" />
