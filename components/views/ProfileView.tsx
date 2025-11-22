@@ -7,6 +7,7 @@ import { downloadDataAsJson, importDataFromFile } from '@/services/api';
 import { formatCurrency } from '@/lib/currency';
 import type { Category } from '@/types';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import StatementImportModal from '@/components/StatementImportModal';
 
 
 const currencyFormatter = new Intl.NumberFormat('en-HK', { style: 'currency', currency: 'HKD' });
@@ -480,8 +481,8 @@ const GoalCard: React.FC<{ goal: any }> = ({ goal }) => {
                 statusColor = 'text-red-500';
                 const progressPct = (settings.totalSavings / goal.targetAmount) * 100;
                 const additionalIncomeNeeded = monthly - settings.monthlyIncome;
-                const increasePercentage = (additionalIncomeNeeded / settings.monthlyIncome) * 100;
-                explanation = `You need to save ${formatCurrency(monthly).display} per month, but your monthly income is only ${formatCurrency(settings.monthlyIncome).display}. You would need to earn ${increasePercentage.toFixed(0)}% more (${formatCurrency(additionalIncomeNeeded).display}) to make this goal achievable.`;
+                // Simplified explanation as requested
+                explanation = `This goal is unachievable with current income. You need to save ${formatCurrency(monthly).display}/mo, which is ${formatCurrency(additionalIncomeNeeded).display} more than your entire monthly income.`;
                 recommendations = [
                     `Extend deadline: Moving the deadline by ${Math.ceil(monthsLeft * 0.5)} months would reduce monthly savings to ${formatCurrency(remainingAmount / (monthsLeft * 1.5)).display}`,
                     `Reduce target: Lowering the goal by 20% would require ${formatCurrency(goal.targetAmount * 0.8 * (1 - progressPct / 100) / monthsLeft).display} per month`,
@@ -661,6 +662,7 @@ const CardsSection: React.FC = () => {
     const [name, setName] = useState('');
     const [limit, setLimit] = useState('');
     const [payingCardId, setPayingCardId] = useState<string | null>(null);
+    const [importingCardId, setImportingCardId] = useState<string | null>(null);
     const [paymentAmount, setPaymentAmount] = useState('');
     const activeCards = cards.filter(c => !c.archived);
 
@@ -736,37 +738,51 @@ const CardsSection: React.FC = () => {
                                     </PrivacyWrapper>
                                 </div>
                             </div>
-                            {card.balance > 0 && (
-                                <div className="pt-2 border-t border-border">
-                                    {payingCardId === card.id ? (
-                                        <form onSubmit={handlePayCard} className="flex gap-2">
-                                            <input 
-                                                type="number" 
-                                                placeholder="Amount" 
-                                                value={paymentAmount} 
-                                                onChange={e => setPaymentAmount(e.target.value)} 
-                                                required 
-                                                min="0.01"
-                                                max={Math.min(card.balance, settings?.totalSavings || 0)}
-                                                step="0.01"
-                                                className="flex-1 bg-input p-2 rounded-md font-numbers text-xs sm:text-sm"
-                                            />
-                                            <button type="submit" className="bg-green-600 text-white font-bold px-3 py-2 rounded-md text-xs sm:text-sm whitespace-nowrap">Pay</button>
-                                            <button type="button" onClick={() => { setPayingCardId(null); setPaymentAmount(''); }} className="bg-secondary text-foreground px-3 py-2 rounded-md text-xs sm:text-sm">Cancel</button>
-                                        </form>
-                                    ) : (
+                            
+                            <div className="pt-2 border-t border-border">
+                                {payingCardId === card.id ? (
+                                    <form onSubmit={handlePayCard} className="flex gap-2">
+                                        <input 
+                                            type="number" 
+                                            placeholder="Amount" 
+                                            value={paymentAmount} 
+                                            onChange={e => setPaymentAmount(e.target.value)} 
+                                            required 
+                                            min="0.01"
+                                            max={Math.min(card.balance, settings?.totalSavings || 0)}
+                                            step="0.01"
+                                            className="flex-1 bg-input p-2 rounded-md font-numbers text-xs sm:text-sm"
+                                        />
+                                        <button type="submit" className="bg-green-600 text-white font-bold px-3 py-2 rounded-md text-xs sm:text-sm whitespace-nowrap">Pay</button>
+                                        <button type="button" onClick={() => { setPayingCardId(null); setPaymentAmount(''); }} className="bg-secondary text-foreground px-3 py-2 rounded-md text-xs sm:text-sm">Cancel</button>
+                                    </form>
+                                ) : (
+                                    <div className="flex gap-2">
                                         <button 
-                                            onClick={() => setPayingCardId(card.id)} 
-                                            className="w-full bg-green-600 text-white font-bold py-2 rounded-md text-xs sm:text-sm"
+                                            onClick={() => setPayingCardId(card.id)}
+                                            disabled={card.balance <= 0}
+                                            className={`flex-1 font-bold py-2 rounded-md text-xs sm:text-sm ${card.balance > 0 ? 'bg-green-600 text-white' : 'bg-secondary text-muted-foreground cursor-not-allowed'}`}
                                         >
-                                            Pay Credit Card
+                                            Pay Card
                                         </button>
-                                    )}
-                                </div>
-                            )}
+                                        <button 
+                                            onClick={() => setImportingCardId(card.id)} 
+                                            className="flex-1 bg-primary text-primary-foreground font-bold py-2 rounded-md text-xs sm:text-sm"
+                                        >
+                                            Import
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     );
                 })}
+            {importingCardId && (
+                <StatementImportModal 
+                    cardId={importingCardId} 
+                    onClose={() => setImportingCardId(null)} 
+                />
+            )}
         </section>
     );
 };
